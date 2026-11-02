@@ -11,5 +11,9 @@ body {
     background: #73aae9;
 
     width: 31.25vw;
-    height: 100vh;
+    height: auto;
+
+    aspect-ratio: 600 / 911;
+
+    object-fit: contain;
 }

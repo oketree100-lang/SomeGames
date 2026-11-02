@@ -1,6 +1,10 @@
 const canvas = document.getElementById("canvas");
 
-canvas.height = window.innerHeight;
+canvas.width = 600;
+canvas.height = 911;
+
+const width = 600;
+const height = 911;
 
 const ctx = canvas.getContext("2d");
 
@@ -51,15 +55,15 @@ function resetGame() {
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#8b6107"
-    ctx.fillRect(-(bird.x % 600), window.innerHeight - 150, 300, 150);
-    ctx.fillRect(600 - (bird.x % 600), window.innerHeight - 150, 300, 150);
+    ctx.fillRect(-(bird.x % 600), height - 150, 300, 150);
+    ctx.fillRect(600 - (bird.x % 600), height - 150, 300, 150);
 
     ctx.fillStyle = "#5f4409"
-    ctx.fillRect(300 - (bird.x % 600), window.innerHeight - 150, 300, 150);
-    ctx.fillRect(900 - (bird.x % 600), window.innerHeight - 150, 300, 150);
+    ctx.fillRect(300 - (bird.x % 600), height - 150, 300, 150);
+    ctx.fillRect(900 - (bird.x % 600), height - 150, 300, 150);
 
     ctx.fillStyle = "#3d9627"
-    ctx.fillRect(0, window.innerHeight - 150, 600, 25);
+    ctx.fillRect(0, height - 150, 600, 25);
 
     if (state || !ready) {
         bird.v += 0.4;
@@ -91,7 +95,7 @@ function render() {
             i--;
         }
 
-        if ((((bird.y < poll.y - 175 || bird.y > poll.y - 25) && poll.x > 50 && poll.x < 200) || (bird.y < 0 || bird.y > window.innerHeight)) && state ) {
+        if ((((bird.y < poll.y - 175 || bird.y > poll.y - 25) && poll.x > 50 && poll.x < 200) || (bird.y < 0 || bird.y > height)) && state ) {
             state = false;
             ready = false;
             clearTimeout(pollTimeout);
@@ -124,7 +128,7 @@ function render() {
 function addPoll() {
     polls.push({
         x : 600,
-        y : window.innerHeight - Math.random() * window.innerHeight * 0.5 - 200
+        y : height - Math.random() * height * 0.5 - 200
     })
 
     pollTimeout = setTimeout(addPoll, Math.random() * 1000 + 1500);

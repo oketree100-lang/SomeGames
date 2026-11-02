@@ -1,0 +1,28 @@
+:root {
+    --pc: #94df4f;
+    --sc: #b0ec4f;
+}
+
+body {
+    height: 100vh;
+
+    overflow: hidden;
+    place-items: center;
+    align-items: center;
+    display: grid;
+}
+
+#canvas {
+    width: 600px;
+    height: 600px;
+
+    background-color: var(--pc);
+    background-image: 
+        linear-gradient(45deg, var(--sc) 25%, transparent 25%), 
+        linear-gradient(-45deg, var(--sc) 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, var(--sc) 75%), 
+        linear-gradient(-45deg, transparent 75%, var(--sc) 75%);
+    
+    background-size: 70.588px 70.588px;
+    background-position: 0 0, 0 35.294px, 35.294px -35.294px, -35.294px 0px;
+}

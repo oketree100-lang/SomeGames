@@ -1,0 +1,25 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    
+    height: 100vh;
+
+    overflow: hidden;
+    
+    display: grid;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #111;
+}
+
+#canvas {
+    background-color: rgb(25, 185, 92);
+
+    width: 90vw;
+    height: auto;
+
+    aspect-ratio: 16 / 9;
+
+    object-fit: contain;
+}

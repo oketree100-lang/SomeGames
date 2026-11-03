@@ -52,7 +52,14 @@ function resetGame() {
     ready = true;
 }
 
+let lastTime = Date.now();
+
 function render() {
+    const currentTime = Date.now();
+    const dt = currentTime - lastTime;
+    
+    lastTime = currentTime;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#8b6107"
     ctx.fillRect(-(bird.x % 600), height - 150, 300, 150);
@@ -67,10 +74,10 @@ function render() {
 
     if (state || !ready) {
         bird.v += 0.4;
-        bird.y += bird.v;
+        bird.y += bird.v * dt / 17;
     }
     if (state) {
-        bird.x += 1;
+        bird.x += dt / 17;
     }
 
     for (let i = 0; i < polls.length; i++) {

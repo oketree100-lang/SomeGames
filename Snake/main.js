@@ -1,8 +1,22 @@
 const canvas = document.getElementById("canvas");
 
-const ctx = canvas.getContext("2d");
+let width, height, ctx, squareSize;
 
-const squareSize = 35.294;
+function resize(e) {
+    const rect = canvas.getBoundingClientRect();
+
+    width = rect.width;
+    height = rect.height;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    squareSize = width / 17;
+    ctx = canvas.getContext("2d");
+}
+
+window.addEventListener("resize", resize)
+resize()
 
 const keys = {
     "w" : "North",
@@ -127,7 +141,7 @@ document.addEventListener("keydown", (e) => {
 })
 
 function render() {
-    ctx.clearRect(0, 0, 600, 600);
+    ctx.clearRect(0, 0, width, height);
 
     ctx.fillStyle = "#df3434";
     ctx.fillRect(apple[0] * squareSize, apple[1] * squareSize, squareSize + 1, squareSize + 1);

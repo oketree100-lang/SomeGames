@@ -32,3 +32,7 @@ body {
     font-size: 30px;
     font-family:'Courier New', Courier, monospace;
 }
+
+.game:hover {
+    background-color: rgb(221, 215, 169);
+}

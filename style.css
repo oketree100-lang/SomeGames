@@ -20,8 +20,14 @@ body {
 }
 
 .game {
-    width: 250px;
-    height: 125px;
+    transition: filter 0.2s ease, width 0.2s ease, height 0.2s ease;
+    
+    width: 13vw;
+    height: auto;
+
+    aspect-ratio: 2;
+
+    object-fit: contain;
 
     margin: 5px;
     padding: 5px;
@@ -35,4 +41,22 @@ body {
 
 .game:hover {
     background-color: rgb(221, 215, 169);
+    filter: brightness(0.7);
+    width: 12.5vw;
+}
+
+#sandbox {
+    background-image: url('SandBox/background.png');
+    background-size: cover;
+    background-position: center;
+}
+
+#snake {
+    background-image: url("Snake/background.png");
+    background-size: cover;
+}
+
+#flappy-bird {
+    background-image: url(FlappyBird/background.png);
+    background-size: cover;
 }

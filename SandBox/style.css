@@ -6,6 +6,8 @@ body {
 
     align-items: center;
     justify-content: center;
+
+    background-color: #222;
 }
 
 #canvas {
@@ -23,7 +25,10 @@ body {
     background-color: #000000;
 }
 
-#text-box {
+#search-box {
+    container-type: inline-size;
+    flex-direction: column;
+
     position: absolute;
     
     left: 50%;
@@ -33,7 +38,64 @@ body {
     visibility: hidden;
     
     width: auto;
-    height: 10vh;
+    height: 60vh;
+
+    max-height: 40vw;
+
+    aspect-ratio: 2;
+
+    object-fit: contain;
 
     background-color: #494949;
+}
+
+#text-box {
+    display: grid;
+    
+    position: relative;
+
+    left: 50%;
+    top: 7%;
+    transform: translate(-50%, -50%);
+
+    width: 80cqw;
+    height: 6cqh;
+
+    background-color: #333;
+    border-color: #111;
+    border-radius: 4px;
+
+    align-items: center;
+    justify-content: center;
+}
+
+#text {
+    user-select: none;
+
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 5cqh;
+    text-align: center;
+}
+
+#option-box {
+    width: 100cqw;
+    height: 20cqw;
+    
+    padding: 4cqh;
+}
+
+.cmd {
+    user-select: none;
+
+    border-style: solid;
+    border-radius: 5px;
+    border-color: #000000;
+
+    padding: 2cqh;
+    margin: 0.5cqh;
+
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 3cqh;
+
+    background-color: #4242d8;
 }

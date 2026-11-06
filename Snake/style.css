@@ -10,6 +10,8 @@ body {
     place-items: center;
     align-items: center;
     display: grid;
+
+    background-color: #222;
 }
 
 #canvas-container {

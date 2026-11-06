@@ -1,6 +1,8 @@
 async function main() {
     const canvas = document.getElementById("canvas");
-    const textBox = document.getElementById("text-box");
+    const searchBox = document.getElementById("search-box");
+    const optionBox = document.getElementById("option-box");
+    const text = document.getElementById("text");
 
     const params = new URLSearchParams(window.location.search);
 
@@ -12,24 +14,26 @@ async function main() {
     const dimHalfSize = params.get("halfDim") ?? 100;
     const dim = [dimHalfSize * 2, dimHalfSize];
     const pixels = Array(dim[0] * dim[1]).fill(0);
-    const flaggedPixels = Array(dim[0] * dim[1]).fill(false);
-    const changedPixels = Array(dim[0] * dim[1]).fill(0);
+    const changedPixels = Array(dim[0] * dim[1]).fill(false);
+
+    const cmds = [
+        "/clear", "/tickRate", "/brush",
+        "water", "sand", "concrete", "mud"
+    ]
 
     let tickRate = params.get('tickRate') ?? 1;
 
     let reverse = false;
     function gameTick() {
-        const oldFlaggedPixels = [...flaggedPixels];
-        changedPixels.fill(0);
-        flaggedPixels.fill(0);
+        changedPixels.fill(false);
         
         if (reverse) {
             for (let y = 0; y < dim[1]; y++) {
                 const ty = y * dim[0];
                 for (let x = 0; x < dim[0]; x++) {
                     const tp = ty + x;
-                    if (oldFlaggedPixels[tp]) {
-                        behaviours[pixels[tp]](pixels, dim[0], dim[1], x, y);
+                    if (pixels[tp]) {
+                        behaviours[pixels[tp]](changedPixels, pixels, dim[0], dim[1], x, y);
                     }
                 }
             }
@@ -38,30 +42,14 @@ async function main() {
                 const ty = y * dim[0];
                 for (let x = dim[0] - 1; x >= 0; x--) {
                     const tp = ty + x;
-                    if (oldFlaggedPixels[tp]) {
-                        behaviours[pixels[tp]](pixels, dim[0], dim[1], x, y);
+                    if (pixels[tp]) {
+                        behaviours[pixels[tp]](changedPixels, pixels, dim[0], dim[1], x, y);
                     }
                 }
             }
         }
         
         reverse = !reverse;
-
-        
-        let counter = 0;
-        for (let y = 0; y < dim[1]; y++) {
-            const ty = y * dim[0];
-            for (let x = 0; x < dim[0]; x++) {
-                const tp = ty + x;
-
-                if (pixels[tp] != 0) counter++;
-                
-                if (pixels[tp] != 0 || changedPixels[tp] != 0) {
-                    flaggedPixels[tp] = true;
-                }
-            }
-        }
-        // console.log(counter);
     }
 
     let selectedMaterial = 2;
@@ -79,7 +67,6 @@ async function main() {
                         const tp = ty + nx;
                         if (pixels[tp] == 0 || pixel == 0) {
                             pixels[tp] = pixel;
-                            flaggedPixels[tp] = true;
                         }
                     }
                 }
@@ -89,20 +76,19 @@ async function main() {
 
     let cmd = "";
     function processCmd() {
-        if (cmd.slice(0, 3) == "elm") {
-            // selectedMaterial = parseInt(cmd.slice(4, cmd.length));
+        if (cmd == "/clear") {
+            pixels.fill(0);
+        } else if (cmd.slice(0, 6) ==  "/brush") {
+            hs = parseInt(cmd.slice(7, cmd.length));
+        } else if (cmd.slice(0, 9) == "/tickRate") {
+            tickRate = parseInt(cmd.slice(10, cmd.length));
+        } else {
             for (let i = 0; i < materials.length; i++) {
-                if (cmd.slice(4, cmd.length) == materials[i].name) {
+                if (cmd == materials[i].name) {
                     selectedMaterial = i;
                     break;
                 }
             }
-        } else if (cmd == "clear") {
-            pixels.fill(0);
-        } else if (cmd.slice(0, 5) ==  "brush") {
-            hs = parseInt(cmd.slice(6, cmd.length));
-        } else if (cmd.slice(0, 2) == "tr") {
-            tickRate = parseInt(cmd.slice(3, cmd.length));
         }
     }
 
@@ -118,14 +104,44 @@ async function main() {
             cmd = "";
         } else if (e.key.length == 1) {
             cmd += e.key;
-            console.clear();
-            console.log(cmd);
         }
 
         if (cmd.length != 0) {
-            textBox.style.visibility = "visible";
+            searchBox.style.visibility = "visible";
+            text.textContent = cmd;
         } else {
-            textBox.style.visibility = "hidden";
+            searchBox.style.visibility = "hidden";
+        }
+
+        optionBox.replaceChildren();
+
+        for (let i = 0; i < cmds.length; i++) {
+            const currCmd = cmds[i];
+
+            let error = 0;
+
+            for (let j = 0; j < Math.min(currCmd.length, cmd.length); j++) {
+                if (currCmd[j] != cmd[j]) error++;
+            }
+
+            if (error < 2) {
+                const element = document.createElement('button');
+                element.classList.add("cmd");
+                element.textContent = currCmd;
+
+                element.addEventListener("click", (e) => {
+                    for (let i = 0; i < materials.length; i++) {
+                        if (materials[i].name == currCmd) {
+                            mouseDown = false;
+                            selectedMaterial = i;
+                            cmd = "";
+                            searchBox.style.visibility = "hidden";
+                        }
+                    }
+                })
+
+                optionBox.appendChild(element);
+            }
         }
     }
     document.addEventListener("keydown", keyPress);
@@ -218,10 +234,6 @@ async function main() {
         }
 
         ctx.putImageData(imageData, 0, 0);
-
-        const textCtx = textBox.getContext("2d");
-        textBox.font = "bold 1000px Arial";
-        textCtx.fillText(cmd, 0, 0);
 
         requestAnimationFrame(render);
     }

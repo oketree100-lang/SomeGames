@@ -1,4 +1,4 @@
-function fall(pixels, w, h, x, y) {
+function fall(changedPixels, pixels, w, h, x, y) {
     const op = y * w + x;
     const pixel = pixels[op];
     const options = [];
@@ -7,7 +7,7 @@ function fall(pixels, w, h, x, y) {
         const tx = x + i;
         const ty = y + 1;
         const tp = ty * w + tx;
-        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0) {
+        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0 && !changedPixels[tp] && !changedPixels[op]) {
             options.push(i);
         }
     }
@@ -21,8 +21,13 @@ function fall(pixels, w, h, x, y) {
         const ty = y + 1;
         const tp = ty * w + tx;
 
+        changedPixels[tp] = true;
         pixels[tp] = pixel;
         pixels[op] = 0;
+        changedPixels[op] = true;
+
+        x = tx;
+        y = ty;
 
         return true;
     }
@@ -30,7 +35,7 @@ function fall(pixels, w, h, x, y) {
     return false;
 }
 
-function slide(pixels, w, x, y) {
+function slide(changedPixels, pixels, w, x, y) {
     const op = y * w + x;
     const pixel = pixels[op];
     const options = [];
@@ -38,7 +43,7 @@ function slide(pixels, w, x, y) {
     for (let i = -1; i < 2; i += 2) {
         const tx = x + i;
         const tp = y * w + tx;
-        if (tx >= 0 && tx < w && pixels[tp] == 0) {
+        if (tx >= 0 && tx < w && pixels[tp] == 0 && !changedPixels[tp] && !changedPixels[op]) {
             options.push(i);
         }
     }
@@ -51,8 +56,12 @@ function slide(pixels, w, x, y) {
         const tx = x + offset;
         const tp = y * w + tx;
 
+        changedPixels[tp] = true;
         pixels[tp] = pixel;
         pixels[op] = 0;
+        changedPixels[op] = true;
+
+        x = tx;
 
         return true;
     }
@@ -60,7 +69,7 @@ function slide(pixels, w, x, y) {
     return false;
 }
 
-function displace(pixels, w, h, x, y, validDis) {
+function displace(changedPixels, pixels, w, h, x, y, validDis) {
     const op = y * w + x;
     const pixel = pixels[op];
     const options = [];
@@ -70,7 +79,7 @@ function displace(pixels, w, h, x, y, validDis) {
         const tx = x + i;
         const ty = y + 1;
         const tp = ty * w + tx;
-        if (tx >= 0 && tx < w && ty >= 0 && ty < h && validDis.includes(pixels[tp])) {
+        if (tx >= 0 && tx < w && ty >= 0 && ty < h && validDis.includes(pixels[tp]) && !changedPixels[tp] && !changedPixels[op]) {
             options.push(i);
             swaps.push(pixels[tp]);
         }
@@ -85,8 +94,13 @@ function displace(pixels, w, h, x, y, validDis) {
         const ty = y + 1;
         const tp = ty * w + tx;
 
+        changedPixels[tp] = true;
         pixels[tp] = pixel;
         pixels[op] = swaps[i];
+        changedPixels[op] = true;
+
+        x = tx;
+        y = ty;
 
         return true;
     }
@@ -94,31 +108,59 @@ function displace(pixels, w, h, x, y, validDis) {
     return false;
 }
 
-function fuze(pixels, w, h, x, y, fuzePixel, resultPixel) {
-    const xOptions = [];
-    const yOptions = [];
+function fuze(changedPixels, pixels, w, h, x, y, fuzePixel, resultPixel) {
+    const op = y * w + x;
+    const options = [];
 
-    for (let y = -1; y < 2; y += 2) {
-        const ty = y * w;
-        for (let x = -1; x < 2; x += 2) {
-            if (pixels[0]) {}
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            const nx = x + j;
+            const ny = y + i;
+            const tp = ny * w + nx;
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h && pixels[tp] == fuzePixel && !changedPixels[tp] && !changedPixels[op]) {
+                options.push(tp);
+            }
         }
     }
+
+    const l = options.length;
+
+    if (l) {
+        const tp = options[Math.floor(Math.random() * l)];
+
+        changedPixels[tp] = true;
+        pixels[tp] = 0;
+        pixels[op] = resultPixel;
+        changedPixels[op] = true;
+
+        return true;
+    }
+
+    return false;
 }
 
 
 
 export const behaviours = [
-    (pixels, w, h, x, y) => {}, // Air
-    (pixels, w, h, x, y) => { // Sand
-        if (!fall(pixels, w, h, x, y)) {
-            displace(pixels, w, h, x, y, [0, 2]);
+    (changedPixels, pixels, w, h, x, y) => {}, // Air
+    (changedPixels, pixels, w, h, x, y) => { // Sand
+        if (fuze(changedPixels, pixels, w, h, x, y, 2, 4)) return;
+
+        let cond = fall(changedPixels, pixels, w, h, x, y);
+
+        if (!cond) {
+            cond = displace(changedPixels, pixels, w, h, x, y, [0, 2]);
         }
     },
-    (pixels, w, h, x, y) => { // Water
-        if (!fall(pixels, w, h, x, y)) {
-            slide(pixels, w, x, y);
+    (changedPixels, pixels, w, h, x, y) => { // Water
+        if (!fall(changedPixels, pixels, w, h, x, y)) {
+            slide(changedPixels, pixels, w, x, y);
         }
     },
-    (pixels, w, h, x, y) => {}, // Concrete
+    (changedPixels, pixels, w, h, x, y) => {}, // Concrete
+    (changedPixels, pixels, w, h, x, y) => {
+        if (!fall(changedPixels, pixels, w, h, x, y)) {
+            displace(changedPixels, pixels, w, h, x, y, [0, 2]);
+        }
+    }
 ]

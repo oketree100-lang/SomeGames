@@ -4,6 +4,8 @@ body {
     overflow: hidden;
 
     place-items: center;
+
+    background-color: #222;
 }
 
 #canvas {

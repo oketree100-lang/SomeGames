@@ -20,5 +20,20 @@ body {
 
     image-rendering: pixelated;
 
-    background-color: black;
+    background-color: #000000;
+}
+
+#text-box {
+    position: absolute;
+    
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    visibility: hidden;
+    
+    width: auto;
+    height: 10vh;
+
+    background-color: #494949;
 }

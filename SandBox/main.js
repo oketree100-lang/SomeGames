@@ -1,5 +1,6 @@
 async function main() {
     const canvas = document.getElementById("canvas");
+    const textBox = document.getElementById("text-box");
 
     const params = new URLSearchParams(window.location.search);
 
@@ -45,6 +46,37 @@ async function main() {
             }
         }
     }
+
+    let cmd = "";
+    function processCmd() {
+        if (cmd.slice(0, 3) == "elm") {
+            selectedMaterial = parseInt(cmd.slice(4, cmd.length));
+            cmd = "";
+        }
+    }
+
+    function keyPress(e) {
+        if (e.key == "Enter") {
+            processCmd();
+        } else if (e.key == "Backspace") {
+            cmd = cmd.slice(0, cmd.length - 1);
+            console.log(cmd);
+        } else if (e.key == "Escape") {
+            cmd = "";
+        } else {
+            cmd += e.key;
+            console.log(cmd);
+        }
+
+        // if (cmd.length != 0) {
+        //     textBox.style.visibility = "visible";
+        // } else {
+        //     textBox.style.visibility = "hidden";
+        // }
+
+        textBox.textContent = cmd;
+    }
+    document.addEventListener("keydown", keyPress);
 
     const mouse = [0, 0];
     document.addEventListener("mousemove", (e) => {

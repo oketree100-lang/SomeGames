@@ -9,41 +9,59 @@ async function main() {
 
     const colors = materials.map(element => element.color);
 
-    const tickRate = params.get('tickRate') ?? 1;
     const dimHalfSize = params.get("halfDim") ?? 100;
     const dim = [dimHalfSize * 2, dimHalfSize];
     const pixels = Array(dim[0] * dim[1]).fill(0);
     const flaggedPixels = Array(dim[0] * dim[1]).fill(false);
     const changedPixels = Array(dim[0] * dim[1]).fill(0);
 
+    let tickRate = params.get('tickRate') ?? 1;
+
+    let reverse = false;
     function gameTick() {
-        const oldPixels = [...pixels];
         const oldFlaggedPixels = [...flaggedPixels];
         changedPixels.fill(0);
         flaggedPixels.fill(0);
         
-        for (let y = 0; y < dim[1]; y++) {
-            const ty = y * dim[0];
-            for (let x = 0; x < dim[0]; x++) {
-                const tp = ty + x;
-                const pixel = oldPixels[tp];
-                
-                if (oldFlaggedPixels[tp]) {
-                    behaviours[pixel](oldPixels, pixels, dim[0], dim[1], x, y);
+        if (reverse) {
+            for (let y = 0; y < dim[1]; y++) {
+                const ty = y * dim[0];
+                for (let x = 0; x < dim[0]; x++) {
+                    const tp = ty + x;
+                    if (oldFlaggedPixels[tp]) {
+                        behaviours[pixels[tp]](pixels, dim[0], dim[1], x, y);
+                    }
+                }
+            }
+        } else {
+            for (let y = dim[1] - 1; y >= 0; y--) {
+                const ty = y * dim[0];
+                for (let x = dim[0] - 1; x >= 0; x--) {
+                    const tp = ty + x;
+                    if (oldFlaggedPixels[tp]) {
+                        behaviours[pixels[tp]](pixels, dim[0], dim[1], x, y);
+                    }
                 }
             }
         }
+        
+        reverse = !reverse;
 
+        
+        let counter = 0;
         for (let y = 0; y < dim[1]; y++) {
             const ty = y * dim[0];
             for (let x = 0; x < dim[0]; x++) {
                 const tp = ty + x;
+
+                if (pixels[tp] != 0) counter++;
                 
                 if (pixels[tp] != 0 || changedPixels[tp] != 0) {
                     flaggedPixels[tp] = true;
                 }
             }
         }
+        // console.log(counter);
     }
 
     let selectedMaterial = 2;
@@ -83,6 +101,8 @@ async function main() {
             pixels.fill(0);
         } else if (cmd.slice(0, 5) ==  "brush") {
             hs = parseInt(cmd.slice(6, cmd.length));
+        } else if (cmd.slice(0, 2) == "tr") {
+            tickRate = parseInt(cmd.slice(3, cmd.length));
         }
     }
 

@@ -1,17 +1,18 @@
 [
     {
         "name": "empty",
-        "color": [0, 0, 0],
-        "behaviour": null
+        "color": [0, 0, 0]
     },
     {
         "name": "sand",
-        "color": [228, 221, 120],
-        "behaviour": "sand"
+        "color": [228, 221, 120]
     },
     {
         "name": "water",
-        "color": [0, 0, 200],
-        "behaviour": "water"
+        "color": [0, 0, 200]
+    },
+    {
+        "name": "concrete",
+        "color": [129, 129, 129]
     }
 ]

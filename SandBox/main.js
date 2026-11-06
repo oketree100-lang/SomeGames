@@ -7,7 +7,7 @@ async function main() {
     const params = new URLSearchParams(window.location.search);
 
     const materials = await (await fetch("materials.json")).json();
-    const { behaviours } = await import("./behaviours.js");
+    const { behaviours, setSim } = await import("./behaviours.js");
 
     const colors = materials.map(element => element.color);
 
@@ -15,6 +15,10 @@ async function main() {
     const dim = [dimHalfSize * 2, dimHalfSize];
     const pixels = Array(dim[0] * dim[1]).fill(0);
     const changedPixels = Array(dim[0] * dim[1]).fill(false);
+    
+    const pixelsAttr = Array.from({length: dim[0] * dim[1]}, () => {
+        temp: 50
+    })
 
     const cmds = [
         "/clear", "/tickRate", "/brush", "/filter"
@@ -36,7 +40,8 @@ async function main() {
                 for (let x = 0; x < dim[0]; x++) {
                     const tp = ty + x;
                     if (pixels[tp]) {
-                        behaviours[pixels[tp]](changedPixels, pixels, dim[0], dim[1], x, y);
+                        setSim(changedPixels, pixels, pixelsAttr, dim[0], dim[1], x, y)
+                        behaviours[pixels[tp]]();
                     }
                 }
             }
@@ -46,7 +51,8 @@ async function main() {
                 for (let x = dim[0] - 1; x >= 0; x--) {
                     const tp = ty + x;
                     if (pixels[tp]) {
-                        behaviours[pixels[tp]](changedPixels, pixels, dim[0], dim[1], x, y);
+                        setSim(changedPixels, pixels, pixelsAttr, dim[0], dim[1], x, y);
+                        behaviours[pixels[tp]]();
                     }
                 }
             }
@@ -90,6 +96,7 @@ async function main() {
             tickRate = parseInt(cmd.slice(10));
         } else if (cmd.slice(0, 7) == "/filter") {
             const s = cmd.slice(8);
+            if (s == "") filter = 0;
             for (let i = 0; i < materials.length; i++) {
                 if (s == materials[i].name) {
                     filter = i;

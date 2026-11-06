@@ -1,3 +1,22 @@
+// -----------------
+// Element constants
+// -----------------
+
+const EMPTY = 0, SAND = 1, WATER = 2, CONCRETE = 3, MUD = 4, LAVA = 5, STONE = 6
+
+
+// ---------------
+// Group constants
+// ---------------
+
+
+const FLUID = [EMPTY, WATER, LAVA];
+
+
+// ----------------
+// Physical actions
+// ----------------
+
 function fall(changedPixels, pixels, w, h, x, y) {
     const op = y * w + x;
     const pixel = pixels[op];
@@ -140,27 +159,50 @@ function fuze(changedPixels, pixels, w, h, x, y, fuzePixel, resultPixel) {
 }
 
 
+// ------------------
+// Material functions
+// ------------------
+
+function empty(changedPixels, pixels, w, h, x, y) {}
+
+function sand(changedPixels, pixels, w, h, x, y) {
+    if (fuze(changedPixels, pixels, w, h, x, y, WATER, MUD)) return;
+
+    let cond = fall(changedPixels, pixels, w, h, x, y);
+
+    if (!cond) {
+        cond = displace(changedPixels, pixels, w, h, x, y, FLUID);
+    }
+}
+
+function water(changedPixels, pixels, w, h, x, y) {
+    if (!fall(changedPixels, pixels, w, h, x, y)) {
+        slide(changedPixels, pixels, w, x, y);
+    }
+}
+
+function mud(changedPixels, pixels, w, h, x, y) {
+    if (!fall(changedPixels, pixels, w, h, x, y)) {
+        displace(changedPixels, pixels, w, h, x, y, FLUID);
+    }
+}
+
+function concrete(changedPixels, pixels, w, h, x, y) {}
+
+function lava(changedPixels, pixels, w, h, x, y) {
+    if (fuze(changedPixels, pixels, w, h, x, y, WATER, STONE)) return;
+
+    if (!fall(changedPixels, pixels, w, h, x, y)) {
+        slide(changedPixels, pixels, w, x, y);
+    }
+}
+
+function stone(changedPixels, pixels, w, h, x, y) {
+    if (!fall(changedPixels, pixels, w, h, x, y)) {
+        displace(changedPixels, pixels, w, h, x, y, FLUID);
+    }
+}
 
 export const behaviours = [
-    (changedPixels, pixels, w, h, x, y) => {}, // Air
-    (changedPixels, pixels, w, h, x, y) => { // Sand
-        if (fuze(changedPixels, pixels, w, h, x, y, 2, 4)) return;
-
-        let cond = fall(changedPixels, pixels, w, h, x, y);
-
-        if (!cond) {
-            cond = displace(changedPixels, pixels, w, h, x, y, [0, 2]);
-        }
-    },
-    (changedPixels, pixels, w, h, x, y) => { // Water
-        if (!fall(changedPixels, pixels, w, h, x, y)) {
-            slide(changedPixels, pixels, w, x, y);
-        }
-    },
-    (changedPixels, pixels, w, h, x, y) => {}, // Concrete
-    (changedPixels, pixels, w, h, x, y) => {
-        if (!fall(changedPixels, pixels, w, h, x, y)) {
-            displace(changedPixels, pixels, w, h, x, y, [0, 2]);
-        }
-    }
+    empty, sand, water, concrete, mud, lava, stone
 ]

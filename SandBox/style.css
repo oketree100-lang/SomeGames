@@ -78,10 +78,16 @@ body {
 }
 
 #option-box {
+    display: flex;
+
+    flex-wrap: wrap;
+
     width: 100cqw;
     height: 20cqw;
     
     padding: 4cqh;
+
+    gap: 1cqh;
 }
 
 .cmd {
@@ -93,6 +99,9 @@ body {
 
     padding: 2cqh;
     margin: 0.5cqh;
+
+    width: auto;
+    height: 10cqh;
 
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-size: 3cqh;

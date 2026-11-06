@@ -17,9 +17,12 @@ async function main() {
     const changedPixels = Array(dim[0] * dim[1]).fill(false);
 
     const cmds = [
-        "/clear", "/tickRate", "/brush",
-        "water", "sand", "concrete", "mud"
-    ]
+        "/clear", "/tickRate", "/brush", "/filter"
+    ];
+
+    for (let i = 0; i < materials.length; i++) {
+        cmds.push(materials[i].name);
+    }
 
     let tickRate = params.get('tickRate') ?? 1;
 
@@ -52,6 +55,7 @@ async function main() {
         reverse = !reverse;
     }
 
+    let filter = 0;
     let selectedMaterial = 2;
     let hs = 3;
     function placePixel(pixel) {
@@ -65,7 +69,9 @@ async function main() {
                 for (let nx = x - hs; nx < x + hs; nx++) {
                     if (nx >= 0 && nx < dim[0] && ny >= 0 && ny < dim[1]) {
                         const tp = ty + nx;
-                        if (pixels[tp] == 0 || pixel == 0) {
+                        if ((pixels[tp] == 0 || pixel == 0) && !filter) {
+                            pixels[tp] = pixel;
+                        } else if (filter == pixels[tp]) {
                             pixels[tp] = pixel;
                         }
                     }
@@ -79,9 +85,17 @@ async function main() {
         if (cmd == "/clear") {
             pixels.fill(0);
         } else if (cmd.slice(0, 6) ==  "/brush") {
-            hs = parseInt(cmd.slice(7, cmd.length));
+            hs = parseInt(cmd.slice(7));
         } else if (cmd.slice(0, 9) == "/tickRate") {
-            tickRate = parseInt(cmd.slice(10, cmd.length));
+            tickRate = parseInt(cmd.slice(10));
+        } else if (cmd.slice(0, 7) == "/filter") {
+            const s = cmd.slice(8);
+            for (let i = 0; i < materials.length; i++) {
+                if (s == materials[i].name) {
+                    filter = i;
+                    break;
+                }
+            }
         } else {
             for (let i = 0; i < materials.length; i++) {
                 if (cmd == materials[i].name) {

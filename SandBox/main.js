@@ -16,10 +16,10 @@ async function main() {
     const pixels = Array(dim[0] * dim[1]).fill(0);
     const changedPixels = Array(dim[0] * dim[1]).fill(false);
     
-    const pixelsAttr = Array.from({length: dim[0] * dim[1]}, () => {
-        temp: 50
-    })
-
+    const pixelsAttr = Array.from({length: dim[0] * dim[1]}, () => ({
+        temp: 0
+    }))
+    
     const cmds = [
         "/clear", "/tickRate", "/brush", "/filter"
     ];
@@ -39,10 +39,8 @@ async function main() {
                 const ty = y * dim[0];
                 for (let x = 0; x < dim[0]; x++) {
                     const tp = ty + x;
-                    if (pixels[tp]) {
-                        setSim(changedPixels, pixels, pixelsAttr, dim[0], dim[1], x, y)
-                        behaviours[pixels[tp]]();
-                    }
+                    setSim(changedPixels, pixels, pixelsAttr, dim[0], dim[1], x, y)
+                    behaviours[pixels[tp]]();
                 }
             }
         } else {
@@ -50,13 +48,17 @@ async function main() {
                 const ty = y * dim[0];
                 for (let x = dim[0] - 1; x >= 0; x--) {
                     const tp = ty + x;
-                    if (pixels[tp]) {
-                        setSim(changedPixels, pixels, pixelsAttr, dim[0], dim[1], x, y);
-                        behaviours[pixels[tp]]();
-                    }
+                    setSim(changedPixels, pixels, pixelsAttr, dim[0], dim[1], x, y);
+                    behaviours[pixels[tp]]();
                 }
             }
         }
+
+        let globalTemp = 0;
+        for (let i = 0; i < dim[0] * dim[1]; i++) {
+            globalTemp += pixelsAttr[i].temp;
+        }
+        console.log(globalTemp);
         
         reverse = !reverse;
     }
@@ -77,8 +79,10 @@ async function main() {
                         const tp = ty + nx;
                         if ((pixels[tp] == 0 || pixel == 0) && !filter) {
                             pixels[tp] = pixel;
+                            pixelsAttr[tp].temp = materials[pixel].temp;
                         } else if (filter == pixels[tp]) {
                             pixels[tp] = pixel;
+                            pixelsAttr[tp].temp = materials[pixel].temp;
                         }
                     }
                 }
@@ -90,6 +94,11 @@ async function main() {
     function processCmd() {
         if (cmd == "/clear") {
             pixels.fill(0);
+            for (let i = 0; i < pixelsAttr.length; i++) {
+                pixelsAttr[i] = {
+                    temp: 0
+                }
+            }
         } else if (cmd.slice(0, 6) ==  "/brush") {
             hs = parseInt(cmd.slice(7));
         } else if (cmd.slice(0, 9) == "/tickRate") {
@@ -232,25 +241,17 @@ async function main() {
         }
 
         for (let y = 0; y < dim[1]; y++) {
-            const startY = y;
-            const endY = y + 1;
-
             for (let x = 0; x < dim[0]; x++) {
-                const rgb = colors[pixels[y * dim[0] + x]];
-                const r =  rgb[0];
-                const g = rgb[1];
-                const b = rgb[2];
+                const tp = y * dim[0] + x;
+                const rgb = colors[pixels[tp]];
+                const [r, g, b] = rgb;
 
-                for (let py = startY; py < endY; py++) {
-                    for (let px = x; px < x + 1; px++) {
-                        const idx = (py * dim[0] + px) * 4;
+                const idx = tp * 4;
 
-                        data[idx] = r;
-                        data[idx + 1] = g;
-                        data[idx + 2] = b;
-                        data[idx + 3] = 255;
-                    }
-                }
+                data[idx] = r;
+                data[idx + 1] = g;
+                data[idx + 2] = b;
+                data[idx + 3] = 255;
             }
         }
 

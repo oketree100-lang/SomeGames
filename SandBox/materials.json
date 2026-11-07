@@ -8,13 +8,14 @@
     {
         "name": "sand",
         "color": [228, 221, 120],
-        "temp": 20
+        "temp": 20,
+        "conductivity": 4
     },
     {
         "name": "water",
         "color": [0, 0, 200],
         "temp": 20,
-        "conductivity": 0.6
+        "conductivity": 5
     },
     {
         "name": "concrete",
@@ -25,22 +26,25 @@
     {
         "name": "mud",
         "color": [212, 185, 61],
-        "temp": 20
+        "temp": 20,
+        "conductivity": 1
     },
     {
         "name": "lava",
         "color": [255, 94, 0],
-        "temp": 300
+        "temp": 300,
+        "conductivity": 20
     },
     {
         "name": "stone",
         "color": [117, 117, 117],
-        "temp": 20
+        "temp": 20,
+        "conductivity": 1
     },
     {
         "name": "smoke",
         "color": [145, 145, 145],
-        "temp": 30,
+        "temp": 500,
         "conductivity": 0.1
     },
     {
@@ -58,7 +62,8 @@
     {
         "name": "steam",
         "color": [170, 170, 220],
-        "temp": 100
+        "temp": 100,
+        "conductivity": 0.1
     },
     {
         "name": "steel",

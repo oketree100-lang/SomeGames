@@ -87,13 +87,14 @@ function transferHeat(op, tp) {
     const tPixel = pixels[tp];
 
     const oc = materials[oPixel].conductivity;
-    const tc = materials[tPixel].conductivity
+    const tc = materials[tPixel].conductivity;
 
     const conductivity = oc * tc / (oc + tc) / 100;
+    
     const heat = conductivity * (pixelsAttr[op].temp - pixelsAttr[tp].temp);
 
     pixelsAttr[op].temp -= heat;
-    pixelsAttr[tp].temp += heat;
+    pixelsAttr[tp].temp += heat * 0.999;
 }
 
 function swap(tx, ty) {

@@ -30,6 +30,7 @@ async function main() {
 
     let tickRate = params.get('tickRate') ?? 1;
 
+    let maxTemp, minTemp;
     let reverse = false;
     function gameTick() {
         changedPixels.fill(false);
@@ -122,10 +123,28 @@ async function main() {
         }
     }
 
+    let displayType = "default";
     function keyPress(e) {
         if (e.key == "Enter") {
             processCmd();
             cmd = "";
+        } else if (["1", "2"].includes(e.key)) {
+            const n = parseInt(e.key);
+
+            if (n == 1) {
+                displayType = "default";
+            } else if (n == 2) {
+                displayType = "heat";
+                maxTemp = pixelsAttr[0].temp;
+                minTemp = pixelsAttr[0].temp;
+
+                for (let i = 0; i < pixels.length; i++) {
+                    const temp = pixelsAttr[i].temp;
+
+                    if (temp > maxTemp) maxTemp = temp;
+                    if (temp < minTemp) minTemp = temp;
+                }
+            }
         } else if (e.key == "Backspace") {
             cmd = cmd.slice(0, cmd.length - 1);
             console.clear();
@@ -244,9 +263,30 @@ async function main() {
             for (let x = 0; x < dim[0]; x++) {
                 const tp = y * dim[0] + x;
                 const rgb = colors[pixels[tp]];
-                const [r, g, b] = rgb;
+                let [r, g, b] = rgb;
 
                 const idx = tp * 4;
+
+                if (!(r || g || b)) {
+                    data[idx] = 0;
+                    data[idx + 1] = 0;
+                    data[idx + 2] = 0;
+                    data[idx + 3] = 255;
+
+                    continue;
+                }
+
+                if (displayType == "heat" && maxTemp != minTemp) {
+                    const t = (pixelsAttr[tp].temp - minTemp) / (maxTemp - minTemp);
+
+                    const hsvColor = new Color("hsv", [
+                        240 * (1 - t),
+                        100,
+                        100
+                    ]);
+
+                    [r, g, b] = hsvColor.to("srgb").coords.map(c => Math.round(c * 255));
+                }
 
                 data[idx] = r;
                 data[idx + 1] = g;

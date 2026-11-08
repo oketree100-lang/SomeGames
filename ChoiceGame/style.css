@@ -1,0 +1,26 @@
+body {
+    display: grid;
+    overflow: hidden;
+    user-select: none;
+
+    padding: 0px;
+    margin: 0px;
+
+    height: 100vh;
+
+    justify-content: center;
+    align-content: center;
+
+    background-color: #222;
+}
+
+#canvas {
+    width: 90vw;
+    height: auto;
+
+    max-width: 200vh;
+
+    aspect-ratio: 2;
+
+    background-color: #ad9167;
+}

@@ -128,7 +128,7 @@ async function main() {
         if (e.key == "Enter") {
             processCmd();
             cmd = "";
-        } else if (["1", "2"].includes(e.key)) {
+        } else if (cmd.length == 0 && ["1", "2"].includes(e.key)) {
             const n = parseInt(e.key);
 
             if (n == 1) {

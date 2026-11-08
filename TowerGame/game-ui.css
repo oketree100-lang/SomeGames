@@ -1,0 +1,11 @@
+#currency-text {
+    position: absolute;
+
+    left: 1%;
+    top: 1%;
+
+    font-family: 'Lilita One', 'Arial Black', sans-serif;
+    font-size: 2cqw;
+    color: white;
+    -webkit-text-stroke: 0.060cqw black;
+}

@@ -4,9 +4,18 @@
         <meta charset="UTF-8">
         <title>Tower Rouge Like!</title>
         <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="game-ui.css">
         <script src="main.js" defer></script>
     </head>
     <body>
-        <canvas id="canvas"></canvas>
+        <div id="game-container">
+            <canvas id="canvas" class="ignore-on-click"></canvas>
+            
+            <div id="game-ui-container" class="ignore-on-click">
+                <div id="top-bar-container" class="ignore-on-click">
+                    <span id="currency-text" class="ignore-on-click">Currency: 0</span>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

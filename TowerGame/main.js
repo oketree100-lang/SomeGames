@@ -27,9 +27,11 @@ const BASIC_ENEMY_HALF_SIZE = BASIC_ENEMY_SIZE * 0.5;
 const TOWER_BULLET_SPEED = 0.7;
 const BASIC_ENEMY_SPEED = 0.1;
 
-const BASIC_ENEMY_MAX_HEALTH = 100;
+const BASIC_ENEMY_BASE_HEALTH = 100;
 
-const BASIC_ENEMY_STOP_RADIUS_SQUARED = 30000;
+const TOWER_BULLET_BASE_DAMAGE = 35;
+
+const BASIC_ENEMY_STOP_RADIUS_SQUARED = 10000;
 
 const gameMouse = {x: 0, y: 0};
 
@@ -51,7 +53,7 @@ let lastFrame = Date.now();
 let dt;
 
 // Game
-let waveAcimulator = 0;
+let waveAcimulator = 5000;
 let waveStageAcimulator = 0;
 
 let towerAngle = 0;
@@ -70,6 +72,13 @@ function handelWindowResize(e) {
     canvas.height = GAME_HEIGHT;
 
     canvasCtx = canvas.getContext("2d");
+}
+
+function handelVisiblityChange() {
+    if (!document.hidden) {
+        lastFrame = Date.now();
+        dt = 0;
+    }
 }
 
 function handelMouseMove(e) {
@@ -97,11 +106,11 @@ function getCollidingEnemy(x, y, w, h) {
     for (let i = 0; i < basicEnemies.length; i++) {
         const currentBasicEnemy = basicEnemies[i];
 
-        const dx = currentBasicEnemy.x - x;
-        const dy = currentBasicEnemy.y - y;
+        const dx = currentBasicEnemy.x + BASIC_ENEMY_HALF_SIZE - x;
+        const dy = currentBasicEnemy.y + BASIC_ENEMY_HALF_SIZE - y;
 
-        if (dx > 0 && dx < w && dy > 0 && dy < h) {
-            return "BasicEnemy";
+        if (dx > 0 && dx < BASIC_ENEMY_SIZE + w && dy > 0 && dy < BASIC_ENEMY_SIZE + h) {
+            return ["BasicEnemy", currentBasicEnemy];
         }
     }
 
@@ -117,7 +126,8 @@ function waveStep() {
         for (let i = 0; i < 3; i++) {
             const newBasicEnemy = {
                 x: Math.random() * GAME_WIDTH * 1.1,
-                y: Math.round(Math.random()) * GAME_HEIGHT * 1.1
+                y: Math.round(Math.random()) * GAME_HEIGHT * 1.1,
+                health: BASIC_ENEMY_BASE_HEALTH
             }
 
             basicEnemies.push(newBasicEnemy);
@@ -132,11 +142,21 @@ function updateTowerBullets() {
         currentTowerBullet.x += TOWER_BULLET_SPEED * Math.cos(currentTowerBullet.angle) * dt;
         currentTowerBullet.y += TOWER_BULLET_SPEED * Math.sin(currentTowerBullet.angle) * dt;
 
+        if (currentTowerBullet.x <= 0 || currentTowerBullet.x > GAME_WIDTH || currentTowerBullet.y <= 0 || currentTowerBullet.y > GAME_WIDTH) {
+            towerBullets.splice(i, 1);
+            i--;
+        }
+
         const collision = getCollidingEnemy(currentTowerBullet.x, currentTowerBullet.y, TOWER_BULLET_SIZE, TOWER_BULLET_SIZE);
 
         if (!collision) {}
-        else if (collision === "BasicEnemy") {
-            towerBullets.slice(i, 1);
+        else if (collision[0] === "BasicEnemy") {
+            towerBullets.splice(i, 1);
+            i--;
+
+            const currentBasicEnemy = collision[1];
+
+            currentBasicEnemy.health -= TOWER_BULLET_BASE_DAMAGE;
         }
     }
 }
@@ -144,6 +164,11 @@ function updateTowerBullets() {
 function updateBasicEnemies() {
     for (let i = 0; i < basicEnemies.length; i++) {
         const currentBasicEnemy = basicEnemies[i];
+
+        if (currentBasicEnemy.health <= 0) {
+            basicEnemies.splice(i, 1);
+            i--;
+        }
 
         if (Math.pow(GAME_HALF_WIDTH - currentBasicEnemy.x, 2) + Math.pow(GAME_HALF_HEIGHT - currentBasicEnemy.y, 2) > BASIC_ENEMY_STOP_RADIUS_SQUARED) {
             const angle = Math.atan2(GAME_HALF_HEIGHT - currentBasicEnemy.y, GAME_HALF_WIDTH - currentBasicEnemy.x);
@@ -196,7 +221,7 @@ function drawBasicEnemies() {
 
         canvasCtx.save();
         canvasCtx.translate(currentBasicEnemy.x, currentBasicEnemy.y);
-        canvasCtx.rotate(angle);
+        // canvasCtx.rotate(angle);
         canvasCtx.fillRect(-BASIC_ENEMY_HALF_SIZE, -BASIC_ENEMY_HALF_SIZE, BASIC_ENEMY_SIZE, BASIC_ENEMY_SIZE);
         canvasCtx.restore();
     }
@@ -226,6 +251,8 @@ function drawFrame() {
 // ===============
 
 window.addEventListener('resize', handelWindowResize);
+
+document.addEventListener('visibilitychange', handelVisiblityChange);
 
 canvas.addEventListener('mousemove', handelMouseMove);
 canvas.addEventListener('click', handelMouseClick);

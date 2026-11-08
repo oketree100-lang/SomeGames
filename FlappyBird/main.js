@@ -57,8 +57,6 @@ let lastTime = Date.now();
 function render() {
     const currentTime = Date.now();
     const dt = currentTime - lastTime;
-    
-    lastTime = currentTime;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#8b6107"
@@ -73,7 +71,7 @@ function render() {
     ctx.fillRect(0, height - 150, 600, 25);
 
     if (state || !ready) {
-        bird.v += 0.4;
+        bird.v += 0.03 * dt;
         bird.y += bird.v * dt / 17;
     }
     if (state) {
@@ -129,6 +127,7 @@ function render() {
     ctx.fillText(score, 300 - offset, 100);
     
 
+    lastTime = currentTime;
     requestAnimationFrame(render);
 }
 

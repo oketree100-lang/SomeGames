@@ -1,26 +1,28 @@
 body {
+    display: flex;
+
     margin: 30px;
 
     background-color: rgb(217, 230, 241);
 
-    place-items: center;
+    justify-content: center;
+
+    user-select: none;
 }
 
-.col {
+.container {
+    width: 80vw;
 
-    flex-direction: column;
-    place-items: center;
-    display: flex;
-}
-
-.row {
     flex-direction: row;
-    place-items: center;
+    /* place-items: center; */
+    justify-content: center;
     display: flex;
+
+    flex-wrap: wrap;
 }
 
 .game {
-    transition: filter 0.2s ease, width 0.2s ease, height 0.2s ease;
+    transition: filter 0.2s ease, width 0.2s ease, height 0.2s ease, margin 0.2s ease;
     
     width: 13vw;
     height: auto;
@@ -29,8 +31,8 @@ body {
 
     object-fit: contain;
 
-    margin: 5px;
-    padding: 5px;
+    margin: 0.3vw;
+    padding: 0.3px;
 
     background-color: rgb(250, 246, 215);
     border-radius: 10px;
@@ -43,16 +45,26 @@ body {
     background-color: rgb(221, 215, 169);
     filter: brightness(0.7);
     width: 12.5vw;
+    
+    margin-left: 0.5vw;
+    margin-right: 0.5vw;
 }
 
 #sandbox {
     background-image: url('SandBox/background.png');
     background-size: cover;
     background-position: center;
+
+    color: rgb(255, 255, 255);
 }
 
 #snake {
     background-image: url("Snake/background.png");
+    background-size: cover;
+}
+
+#tower-game {
+    background-image: url("TowerGame/background.png");
     background-size: cover;
 }
 

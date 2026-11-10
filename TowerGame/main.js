@@ -44,6 +44,9 @@ const BASIC_ENEMY_BASE_HEALTH = 100;
 // Damage
 const TOWER_BULLET_BASE_DAMAGE = 35;
 
+// Cooldown
+const TOWER_SHOOT_BASE_COOLDOWN = 1000;
+
 // Radii
 const BASIC_ENEMY_STOP_RADIUS_SQUARED = 10000;
 
@@ -70,13 +73,17 @@ let dt;
 
 // Game
 let gameValues = {
-    currency: 0
+    currency: 0,
+    
+    upgrades: {
+        cooldown: 0
+    }
 }
 
 let waveAcimulator = 5000;
 let waveStageAcimulator = 0;
 
-let towerAngle = 0;
+let towerShootCooldown = 0;
 
 
 // ====================
@@ -104,22 +111,6 @@ function handleVisiblityChange() {
 function handleMouseMove(e) {
     gameMouse.x = e.clientX - canvasRect.left;
     gameMouse.y = e.clientY - canvasRect.top;
-
-    towerAngle = 3.14 + Math.atan2(canvasRect.height * 0.5 - gameMouse.y, canvasRect.width * 0.5 - gameMouse.x);
-}
-
-function handleMouseClick(e) {
-    if (e.target.classList.contains("ignore-on-click")) {
-        if (e.button === 0) {
-            const newTowerBullet = {
-                x: GAME_HALF_WIDTH,
-                y: GAME_HALF_HEIGHT,
-                angle: towerAngle
-            }
-
-            towerBullets.push(newTowerBullet);
-        }
-    }
 }
 
 // Game Event Handlers
@@ -208,8 +199,49 @@ function updateBasicEnemies() {
     }
 }
 
-function gameStep() {
+function towerShootBullet() {
+    towerShootCooldown += dt;
+
+    if (towerShootCooldown > TOWER_SHOOT_BASE_COOLDOWN * 10 / (gameValues.upgrades.cooldown + 10)) {
+        towerShootCooldown = 0;
+
+        const distancesSquared = [];
+
+        for (let i = 0; i < basicEnemies.length; i++) {
+            const currentBasicEnemy = basicEnemies[i];
+
+            const distance = Math.pow(currentBasicEnemy.x - GAME_HALF_WIDTH) + Math.pow(currentBasicEnemy.y - GAME_HALF_HEIGHT);
+            distancesSquared.push(distance);
+        }
+
+        let min = distancesSquared[0];
+        let idx = 0;
+
+        for (let i = 1; i < distancesSquared.length; i++) {
+            if (distancesSquared[i] < min) {
+                min = distancesSquared[i];
+                idx = i;
+            }
+        }
+
+        const currentBasicEnemy = basicEnemies[idx];
+
+        const angle = Math.atan2(currentBasicEnemy.y - GAME_HALF_HEIGHT, currentBasicEnemy.x - GAME_HALF_WIDTH);
+
+        const newTowerBullet = {
+            x: GAME_HALF_WIDTH,
+            y: GAME_HALF_HEIGHT,
+            angle: angle
+        };
+
+        towerBullets.push(newTowerBullet);
+    }
+}
+
+function stepGameTick() {
     waveStep();
+
+    towerShootBullet();
     
     updateTowerBullets();
 
@@ -221,7 +253,6 @@ function drawTower() {
     canvasCtx.fillStyle = TOWER_COLOR;
     canvasCtx.save();
     canvasCtx.translate(GAME_HALF_WIDTH, GAME_HALF_HEIGHT);
-    canvasCtx.rotate(towerAngle);
     canvasCtx.fillRect(-TOWER_HALF_SIZE, -TOWER_HALF_SIZE, TOWER_SIZE, TOWER_SIZE);
     canvasCtx.restore();
 }
@@ -272,7 +303,7 @@ function stepFrame() {
     const startFrameTime = Date.now();
     dt = startFrameTime - lastFrame;
 
-    gameStep();
+    stepGameTick();
 
     canvasCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
@@ -293,7 +324,6 @@ window.addEventListener('resize', handleWindowResize);
 
 document.addEventListener('visibilitychange', handleVisiblityChange);
 document.addEventListener('mousemove', handleMouseMove);
-document.addEventListener('click', handleMouseClick);
 
 
 // ==========

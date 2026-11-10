@@ -14,10 +14,11 @@ async function main() {
     const dimHalfSize = params.get("halfDim") ?? 100;
     const dim = [dimHalfSize * 2, dimHalfSize];
     const pixels = Array(dim[0] * dim[1]).fill(0);
-    const changedPixels = Array(dim[0] * dim[1]).fill(false);
     
     const pixelsAttr = Array.from({length: dim[0] * dim[1]}, () => ({
-        temp: 0
+        temp: 0,
+        updated: false,
+        moved: false
     }))
     
     const cmds = [
@@ -33,14 +34,24 @@ async function main() {
     let maxTemp, minTemp;
     let reverse = false;
     function gameTick() {
-        changedPixels.fill(false);
+        for (let y = 0; y < dim[1]; y++) {
+            const ty = y * dim[0];
+            for (let x = 0; x < dim[0]; x++) {
+                const tp = ty + x;
+                pixelsAttr[tp].updated = false;
+                pixelsAttr[tp].moved = false;
+            }
+        }
         
         if (reverse) {
             for (let y = 0; y < dim[1]; y++) {
                 const ty = y * dim[0];
                 for (let x = 0; x < dim[0]; x++) {
                     const tp = ty + x;
-                    setSim(changedPixels, pixels, pixelsAttr, dim[0], dim[1], x, y)
+
+                    if (pixels[tp] == 0 || pixelsAttr[tp].updated) continue;
+
+                    setSim(pixels, pixelsAttr, dim[0], dim[1], x, y)
                     behaviours[pixels[tp]]();
                 }
             }
@@ -49,7 +60,10 @@ async function main() {
                 const ty = y * dim[0];
                 for (let x = dim[0] - 1; x >= 0; x--) {
                     const tp = ty + x;
-                    setSim(changedPixels, pixels, pixelsAttr, dim[0], dim[1], x, y);
+
+                    if (pixels[tp] == 0 && pixelsAttr[tp].updated) continue;
+
+                    setSim(pixels, pixelsAttr, dim[0], dim[1], x, y);
                     behaviours[pixels[tp]]();
                 }
             }
@@ -59,7 +73,6 @@ async function main() {
         for (let i = 0; i < dim[0] * dim[1]; i++) {
             globalTemp += pixelsAttr[i].temp;
         }
-        console.log(globalTemp);
         
         reverse = !reverse;
     }
@@ -103,7 +116,11 @@ async function main() {
         } else if (cmd.slice(0, 6) ==  "/brush") {
             hs = parseInt(cmd.slice(7));
         } else if (cmd.slice(0, 9) == "/tickRate") {
-            tickRate = parseInt(cmd.slice(10));
+            if (cmd.slice(10) == "max") {
+                tickRate = 1;
+            } else {
+                tickRate = 1000 / parseInt(cmd.slice(10));
+            }
         } else if (cmd.slice(0, 7) == "/filter") {
             const s = cmd.slice(8);
             if (s == "") filter = 0;

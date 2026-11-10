@@ -35,7 +35,7 @@ const DISPLACE1 = [...FLUID, ...GAS];
 // ---------------------------
 
 
-let changedPixels, pixels, pixelsAttr, w, h, x, y, op;
+let pixels, pixelsAttr, w, h, x, y, op;
 
 
 // -------------------
@@ -43,8 +43,7 @@ let changedPixels, pixels, pixelsAttr, w, h, x, y, op;
 // -------------------
 
 
-export function setSim(_changedPixels, _pixels, _pixelsAttr, _w, _h, _x, _y) {
-    changedPixels = _changedPixels;
+export function setSim(_pixels, _pixelsAttr, _w, _h, _x, _y) {
     pixels = _pixels;
     pixelsAttr = _pixelsAttr;
     w = _w;
@@ -74,12 +73,17 @@ export function setSim(_changedPixels, _pixels, _pixelsAttr, _w, _h, _x, _y) {
     }
 }
 
+
+function isValidAction(op, tp) {
+    return !pixelsAttr[op].updated && (pixels[tp] == 0 || pixelsAttr[tp].moved);
+}
+
+
 function setPixel(tp, pixel) {
     pixels[tp] = pixel;
 
     pixelsAttr[tp].temp = materials[pixel].temp;
-
-    changedPixels[tp] = true;
+    pixelsAttr.updated = true;
 }
 
 function transferHeat(op, tp) {
@@ -106,25 +110,26 @@ function swap(tx, ty) {
     const oTemp = pixelsAttr[op].temp
     const tTemp = pixelsAttr[tp].temp;
 
-    changedPixels[op] = true;
-    changedPixels[tp] = true;
-
     pixels[op] = tPixel;
     pixels[tp] = oPixel;
 
     pixelsAttr[op].temp = tTemp;
+    pixelsAttr[op].moved = true;
     pixelsAttr[tp].temp = oTemp;
+    pixelsAttr[tp].updated = true;
+
 
     x = tx;
     y = ty;
 }
 
 function deletePixel(tp) {
-    changedPixels[tp] = true;
-
     pixels[tp] = EMPTY;
 
     pixelsAttr[tp].temp = 0;
+    pixelsAttr[tp].updated = false;
+    pixelsAttr[tp].moved = false;
+    pixelsAttr[tp].moved = false;
 
     return true;
 }
@@ -143,7 +148,7 @@ function fall() {
         const tx = x + i;
         const ty = y + 1;
         const tp = ty * w + tx;
-        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0 && !changedPixels[tp] && !changedPixels[op]) {
+        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0 && isValidAction(op, tp)) {
             options.push(i);
         }
     }
@@ -172,7 +177,7 @@ function rise() {
         const tx = x + i;
         const ty = y - 1;
         const tp = ty * w + tx;
-        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0 && !changedPixels[tp] && !changedPixels[op]) {
+        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0 && isValidAction(op, tp)) {
             options.push(i);
         }
     }
@@ -199,7 +204,7 @@ function slide(...ignorePixels) {
     for (let i = -1; i < 2; i += 2) {
         const tx = x + i;
         const tp = y * w + tx;
-        if (tx >= 0 && tx < w && ignorePixels.includes(pixels[tp]) && !changedPixels[tp] && !changedPixels[op]) {
+        if (tx >= 0 && tx < w && ignorePixels.includes(pixels[tp]) && isValidAction(op, tp)) {
             options.push(i);
         }
     }
@@ -220,7 +225,6 @@ function slide(...ignorePixels) {
 }
 
 function displace(...validDis) {
-    const pixel = pixels[op];
     const options = [];
     const swaps = [];
 
@@ -228,7 +232,7 @@ function displace(...validDis) {
         const tx = x + i;
         const ty = y + 1;
         const tp = ty * w + tx;
-        if (tx >= 0 && tx < w && ty >= 0 && ty < h && validDis.includes(pixels[tp]) && !changedPixels[tp] && !changedPixels[op]) {
+        if (tx >= 0 && tx < w && ty >= 0 && ty < h && validDis.includes(pixels[tp]) && isValidAction(op, tp)) {
             options.push(i);
             swaps.push(pixels[tp]);
         }
@@ -258,7 +262,7 @@ function fuse(fusePixel, resultPixel) {
             const nx = x + j;
             const ny = y + i;
             const tp = ny * w + nx;
-            if (nx >= 0 && nx < w && ny >= 0 && ny < h && pixels[tp] == fusePixel && !changedPixels[tp] && !changedPixels[op]) {
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h && pixels[tp] == fusePixel && isValidAction(op, tp)) {
                 options.push(tp);
             }
         }
@@ -322,7 +326,7 @@ function sand() {
 }
 
 function water() {
-    if (pixelsAttr[y * w + x].temp >= 100) {
+    if (pixelsAttr[y * w + x].temp >= 500) {
         setPixel(y * w + x, STEAM);
     }
 

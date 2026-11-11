@@ -71,7 +71,7 @@ function render() {
     ctx.fillRect(0, height - 150, 600, 25);
 
     if (state || !ready) {
-        bird.v += 0.03 * dt;
+        bird.v += 0.025 * dt;
         bird.y += bird.v * dt / 17;
     }
     if (state) {
@@ -82,7 +82,7 @@ function render() {
         const poll = polls[i];
 
         if (state) {
-            poll.x -= 3;
+            poll.x -= 0.2 * dt;
         }
 
         ctx.fillStyle = "#2b6e0c";

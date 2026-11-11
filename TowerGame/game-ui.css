@@ -23,6 +23,8 @@
     height: 7cqh;
 
     background-color: #4ee031;
+    border: solid;
+    border-radius: 5px;
 
     display: grid;
 
@@ -68,4 +70,44 @@
     font-size: 3cqw;
     color: white;
     -webkit-text-stroke: 0.060cqw black;
+}
+
+#tower-upgrades-menu {
+    --x-offset: 1;
+
+    position: absolute;
+
+    transition: left ease 0.2s;
+
+    left: calc(-20% * var(--x-offset));
+    top: 10%;
+
+    width: 25cqw;
+    height: 45cqw;
+
+    background-color: #e7a160;
+}
+
+#tower-upgrades-open-close {
+    position: absolute;
+    
+    transform: translate(0, -50%) rotate(-90deg);
+
+    left: 76%;
+    top: 50%;
+
+    padding: 0.5cqw;
+
+    font-family: 'Lilita One', 'Arial Black', sans-serif;
+    font-size: 2cqw;
+    color: white;
+    -webkit-text-stroke: 0.060cqw black;
+
+    background-color: if(
+        style(--x-offset: 1): #51c5c5;
+        else: #ad2525;
+    );
+    border: solid;
+    border-color: black;
+    border-width: 0.2cqw;
 }

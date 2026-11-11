@@ -16,6 +16,7 @@ body {
 
 #game-container {
     position: relative;
+    overflow: clip;
 
     container-type: size;
 

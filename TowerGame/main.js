@@ -10,6 +10,8 @@ const canvas = document.getElementById("canvas");
 const currencyText = document.getElementById("currency-text");
 const towerHealthText = document.getElementById("tower-health-text");
 const waveText = document.getElementById("wave-text");
+const towerUpgradesOpenClose = document.getElementById("tower-upgrades-open-close");
+const towerUpgradesMenu = document.getElementById("tower-upgrades-menu");
 
 const towerHealthBar = document.getElementById("tower-health-bar");
 
@@ -104,6 +106,7 @@ let towerHealth = TOWER_BASE_HEALTH;
 
 
 // Event Handlers
+// Window
 function handleWindowResize(e) {
     canvasRect = canvas.getBoundingClientRect();
 
@@ -120,6 +123,18 @@ function handleVisiblityChange() {
     }
 }
 
+// HTML
+function handleTowerUpgradesOpenCloseClick() {
+    towerUpgradesMenu.style.setProperty("--x-offset", 1 - getComputedStyle(towerUpgradesMenu).getPropertyValue("--x-offset"));
+    
+    if (towerUpgradesOpenClose.textContent == "Open") {
+        towerUpgradesOpenClose.textContent = "Close";
+    } else {
+        towerUpgradesOpenClose.textContent = "Open";
+    }
+}
+
+// Mouse
 function handleMouseMove(e) {
     gameMouse.x = e.clientX - canvasRect.left;
     gameMouse.y = e.clientY - canvasRect.top;
@@ -128,6 +143,16 @@ function handleMouseMove(e) {
 // Game Event Handlers
 function handleBasicEnemyDeath() {
     gameValues.currency += 10;
+}
+
+function handleTowerDeath() {
+    towerHealth = TOWER_BASE_HEALTH;
+
+    wave = 1;
+    waveAcimulator = 0;
+    waveStageAcimulator = 0;
+
+    basicEnemies.length = 0;
 }
 
 // Game Logic
@@ -276,16 +301,6 @@ function shootTowerBullet() {
     }
 }
 
-function handleTowerDeath() {
-    towerHealth = TOWER_BASE_HEALTH;
-
-    wave = 1;
-    waveAcimulator = 0;
-    waveStageAcimulator = 0;
-
-    basicEnemies.length = 0;
-}
-
 function updateTower() {
     towerShootCooldown += dt;
 
@@ -383,6 +398,8 @@ window.addEventListener('resize', handleWindowResize);
 
 document.addEventListener('visibilitychange', handleVisiblityChange);
 document.addEventListener('mousemove', handleMouseMove);
+
+towerUpgradesOpenClose.addEventListener('click', handleTowerUpgradesOpenCloseClick);
 
 
 // ==========

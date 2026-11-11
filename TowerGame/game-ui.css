@@ -1,3 +1,36 @@
+.upgrade {
+    display: grid;
+
+    justify-content: center;
+
+    width: 15cqw;
+    height: 6cqw;
+
+    margin: 0.3cqw;
+
+    
+    font-family: 'Lilita One', 'Arial Black', sans-serif;
+    font-size: 1.4cqw;
+    color: white;
+    -webkit-text-stroke: 0.060cqw black;
+
+    background-color: rgb(77, 77, 175);
+}
+
+.buy-button {
+    position: relative;
+
+    align-content: center;
+    text-align: center;
+
+    bottom: 10%;
+
+    background-color: #4ee031;
+    border: solid;
+    border-color: black;
+    border-radius: 10px;
+}
+
 #currency-text {
     position: absolute;
 
@@ -75,6 +108,8 @@
 #tower-upgrades-menu {
     --x-offset: 1;
 
+    overflow: clip;
+
     position: absolute;
 
     transition: left ease 0.2s;
@@ -86,6 +121,13 @@
     height: 45cqw;
 
     background-color: #e7a160;
+}
+
+#tower-upgrades-container {
+    overflow-y: auto;
+    scrollbar-width: none;
+
+    height: 45cqw;
 }
 
 #tower-upgrades-open-close {

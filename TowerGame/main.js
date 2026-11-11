@@ -8,6 +8,8 @@ const canvas = document.getElementById("canvas");
 
 // UI
 const currencyText = document.getElementById("currency-text");
+const towerHealthText = document.getElementById("tower-health-text");
+const towerHealthBar = document.getElementById("tower-health-bar");
 
 // Color Constants
 const TOWER_COLOR = "#ffc400";
@@ -39,13 +41,16 @@ const TOWER_BULLET_SPEED = 0.7;
 const BASIC_ENEMY_SPEED = 0.1;
 
 // Health
+const TOWER_BASE_HEALTH = 100;
 const BASIC_ENEMY_BASE_HEALTH = 100;
 
 // Damage
 const TOWER_BULLET_BASE_DAMAGE = 35;
+const BASIC_ENEMY_BASE_DAMAGE = 3;
 
 // Cooldown
 const TOWER_SHOOT_BASE_COOLDOWN = 1000;
+const BASIC_ENEMY_BASE_ATTACK_COOLDOWN = 1000;
 
 // Radii
 const BASIC_ENEMY_STOP_RADIUS_SQUARED = 10000;
@@ -84,6 +89,7 @@ let waveAcimulator = 5000;
 let waveStageAcimulator = 0;
 
 let towerShootCooldown = 0;
+let towerHealth = TOWER_BASE_HEALTH;
 
 
 // ====================
@@ -145,7 +151,8 @@ function waveStep() {
             const newBasicEnemy = {
                 x: Math.random() * GAME_WIDTH * 1.1,
                 y: Math.round(Math.random()) * GAME_HEIGHT * 1.1,
-                health: BASIC_ENEMY_BASE_HEALTH
+                health: BASIC_ENEMY_BASE_HEALTH,
+                attackCooldown: 0
             }
 
             basicEnemies.push(newBasicEnemy);
@@ -183,6 +190,8 @@ function updateBasicEnemies() {
     for (let i = 0; i < basicEnemies.length; i++) {
         const currentBasicEnemy = basicEnemies[i];
 
+        currentBasicEnemy.attackCooldown += dt;
+
         if (currentBasicEnemy.health <= 0) {
             basicEnemies.splice(i, 1);
             i--;
@@ -195,6 +204,11 @@ function updateBasicEnemies() {
 
             currentBasicEnemy.x += BASIC_ENEMY_SPEED * Math.cos(angle) * dt;
             currentBasicEnemy.y += BASIC_ENEMY_SPEED * Math.sin(angle) * dt;
+        } else {
+            if (currentBasicEnemy.attackCooldown > BASIC_ENEMY_BASE_ATTACK_COOLDOWN) {
+                currentBasicEnemy.attackCooldown = 0;
+                towerHealth -= BASIC_ENEMY_BASE_DAMAGE;
+            }
         }
     }
 }
@@ -289,6 +303,9 @@ function drawBasicEnemies() {
 
 function updateUI() {
     currencyText.textContent = `Currency: ${gameValues.currency}`;
+    towerHealthText.textContent = `${towerHealth} / ${TOWER_BASE_HEALTH}`;
+
+    towerHealthBar.style.setProperty("--width-scale", towerHealth / TOWER_BASE_HEALTH);
 }
 
 function drawCalls() {

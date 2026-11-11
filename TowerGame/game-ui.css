@@ -9,3 +9,49 @@
     color: white;
     -webkit-text-stroke: 0.060cqw black;
 }
+
+#tower-health-bar {
+    --width-scale: 1;
+
+    position: absolute;
+
+    left: 50%;
+    bottom: 5%;
+    transform: translate(-15cqw);
+    
+    width: calc(30cqw * var(--width-scale));
+    height: 7cqh;
+
+    background-color: #4ee031;
+
+    display: grid;
+
+    justify-content: center;
+    align-items: center;
+}
+
+#tower-health-background-bar {
+    position: absolute;
+
+    left: 50%;
+    bottom: 5%;
+    transform: translate(-50%);
+
+    width: 30cqw;
+    height: 7cqh;
+
+    background-color: #777777;
+}
+
+#tower-health-text {
+    position: absolute;
+
+    left: 50%;
+    bottom: 7%;
+    transform: translate(-50%);
+
+    font-family: 'Lilita One', 'Arial Black', sans-serif;
+    font-size: 2cqw;
+    color: white;
+    -webkit-text-stroke: 0.060cqw black;
+}

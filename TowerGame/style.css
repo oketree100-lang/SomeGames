@@ -17,7 +17,7 @@ body {
 #game-container {
     position: relative;
 
-    container-type: inline-size;
+    container-type: size;
 
     width: 90vw;
     height: auto;

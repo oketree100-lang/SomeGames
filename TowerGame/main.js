@@ -9,6 +9,8 @@ const canvas = document.getElementById("canvas");
 // UI
 const currencyText = document.getElementById("currency-text");
 const towerHealthText = document.getElementById("tower-health-text");
+const waveText = document.getElementById("wave-text");
+
 const towerHealthBar = document.getElementById("tower-health-bar");
 
 // Color Constants
@@ -45,7 +47,7 @@ const TOWER_BASE_HEALTH = 100;
 const BASIC_ENEMY_BASE_HEALTH = 100;
 
 // Damage
-const TOWER_BULLET_BASE_DAMAGE = 35;
+const TOWER_BULLET_BASE_DAMAGE = 50;
 const BASIC_ENEMY_BASE_DAMAGE = 3;
 
 // Cooldown
@@ -57,6 +59,9 @@ const BASIC_ENEMY_STOP_RADIUS_SQUARED = 10000;
 
 
 // Other
+const WAVE_BASE_DELAY = 3000;
+
+// Objects
 const gameMouse = {x: 0, y: 0};
 
 const towerBullets = [];
@@ -85,8 +90,9 @@ let gameValues = {
     }
 }
 
-let waveAcimulator = 5000;
+let waveAcimulator = 0;
 let waveStageAcimulator = 0;
+let wave = 1;
 
 let towerShootCooldown = 0;
 let towerHealth = TOWER_BASE_HEALTH;
@@ -141,22 +147,38 @@ function getCollidingEnemy(x, y, w, h) {
     return null;
 }
 
-function waveStep() {
+function stepWave() {
     waveAcimulator += dt;
 
-    if (waveAcimulator > 5000) {
-        waveAcimulator -= 5000;
+    if (waveAcimulator > WAVE_BASE_DELAY) {
+        waveAcimulator -= WAVE_BASE_DELAY;
+        waveStageAcimulator++;
 
         for (let i = 0; i < 3; i++) {
+            let x, y;
+
+            if (Math.random() > 0.5) {
+                x = Math.random() * GAME_WIDTH;
+                y = Math.round(Math.random()) * GAME_HEIGHT;
+            } else {
+                x = Math.round(Math.random()) * GAME_WIDTH;
+                y = Math.random() * GAME_HEIGHT;
+            }
+
             const newBasicEnemy = {
-                x: Math.random() * GAME_WIDTH * 1.1,
-                y: Math.round(Math.random()) * GAME_HEIGHT * 1.1,
+                x: x,
+                y: y,
                 health: BASIC_ENEMY_BASE_HEALTH,
                 attackCooldown: 0
             }
 
             basicEnemies.push(newBasicEnemy);
         }
+    }
+
+    if (waveStageAcimulator > 5) {
+        waveStageAcimulator = 0;
+        wave++;
     }
 }
 
@@ -213,18 +235,20 @@ function updateBasicEnemies() {
     }
 }
 
-function towerShootBullet() {
-    towerShootCooldown += dt;
+function shootTowerBullet() {
+    const allEnemies = [...basicEnemies];
+
+    if (allEnemies.length == 0) return;
 
     if (towerShootCooldown > TOWER_SHOOT_BASE_COOLDOWN * 10 / (gameValues.upgrades.cooldown + 10)) {
         towerShootCooldown = 0;
 
         const distancesSquared = [];
 
-        for (let i = 0; i < basicEnemies.length; i++) {
-            const currentBasicEnemy = basicEnemies[i];
+        for (let i = 0; i < allEnemies.length; i++) {
+            const currentEnemy = allEnemies[i];
 
-            const distance = Math.pow(currentBasicEnemy.x - GAME_HALF_WIDTH) + Math.pow(currentBasicEnemy.y - GAME_HALF_HEIGHT);
+            const distance = Math.pow(currentEnemy.x - GAME_HALF_WIDTH) + Math.pow(currentEnemy.y - GAME_HALF_HEIGHT);
             distancesSquared.push(distance);
         }
 
@@ -238,9 +262,9 @@ function towerShootBullet() {
             }
         }
 
-        const currentBasicEnemy = basicEnemies[idx];
+        const currentEnemy = allEnemies[idx];
 
-        const angle = Math.atan2(currentBasicEnemy.y - GAME_HALF_HEIGHT, currentBasicEnemy.x - GAME_HALF_WIDTH);
+        const angle = Math.atan2(currentEnemy.y - GAME_HALF_HEIGHT, currentEnemy.x - GAME_HALF_WIDTH);
 
         const newTowerBullet = {
             x: GAME_HALF_WIDTH,
@@ -252,11 +276,28 @@ function towerShootBullet() {
     }
 }
 
-function stepGameTick() {
-    waveStep();
+function handleTowerDeath() {
+    towerHealth = TOWER_BASE_HEALTH;
 
-    towerShootBullet();
+    wave = 1;
+    waveAcimulator = 0;
+    waveStageAcimulator = 0;
+
+    basicEnemies.length = 0;
+}
+
+function updateTower() {
+    towerShootCooldown += dt;
+
+    if (towerHealth <= 1) handleTowerDeath();
+}
+
+function stepGameTick() {
+    stepWave();
+
+    shootTowerBullet();
     
+    updateTower();
     updateTowerBullets();
 
     updateBasicEnemies();
@@ -304,6 +345,7 @@ function drawBasicEnemies() {
 function updateUI() {
     currencyText.textContent = `Currency: ${gameValues.currency}`;
     towerHealthText.textContent = `${towerHealth} / ${TOWER_BASE_HEALTH}`;
+    waveText.textContent = `Wave: ${wave}`;
 
     towerHealthBar.style.setProperty("--width-scale", towerHealth / TOWER_BASE_HEALTH);
 }

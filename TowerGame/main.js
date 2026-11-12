@@ -16,8 +16,10 @@ const towerUpgradesMenu = document.getElementById("tower-upgrades-menu");
 const towerAttackSpeedUpgrade = document.getElementById("tower-attack-speed-upgrade");
 const towerDamageUpgrade = document.getElementById("tower-damage-upgrade");
 const towerRegenerationUpgrade = document.getElementById("tower-regeneration-upgrade");
+const towerMaxHealthUpgrade = document.getElementById("tower-max-health-upgrade");
 
 const towerHealthBar = document.getElementById("tower-health-bar");
+const waveProgressBar = document.getElementById("wave-progress-bar");
 
 // Color Constants
 const TOWER_COLOR = "#ffc400";
@@ -40,24 +42,20 @@ const TOWER_HALF_SIZE = TOWER_SIZE * 0.5;
 const TOWER_BULLET_HALF_SIZE = TOWER_BULLET_SIZE * 0.5;
 const BASIC_ENEMY_HALF_SIZE = BASIC_ENEMY_SIZE * 0.5;
 
-// Positioning
-const CURRENCY_POSITION_X = GAME_HALF_WIDTH;
-const CURRENCY_POSITION_Y = 70;
-
 // Speeds
-const TOWER_BULLET_SPEED = 0.7;
-const BASIC_ENEMY_SPEED = 0.1;
+const TOWER_BULLET_SPEED = 1.4;
+const BASIC_ENEMY_SPEED = 0.2;
 
 // Health
-const TOWER_BASE_HEALTH = 100;
-const BASIC_ENEMY_BASE_HEALTH = 2;
+const TOWER_BASE_HEALTH = 10;
+const BASIC_ENEMY_BASE_HEALTH = 1;
 
 // Damage
 const TOWER_BULLET_BASE_DAMAGE = 1;
-const BASIC_ENEMY_BASE_DAMAGE = 3;
+const BASIC_ENEMY_BASE_DAMAGE = 1;
 
 // Cooldown
-const TOWER_BASE_ATTACK_COOLDOWN = 1000;
+const TOWER_BASE_ATTACK_COOLDOWN = 700;
 const BASIC_ENEMY_BASE_ATTACK_COOLDOWN = 1000;
 
 // Radii
@@ -65,7 +63,8 @@ const BASIC_ENEMY_STOP_RADIUS_SQUARED = 10000;
 
 
 // Other
-const WAVE_BASE_DELAY = 2000;
+const WAVE_BASE_DELAY = 1400;
+const WAVE_MAX_STAGE = 5;
 
 // Objects
 const gameValues = {
@@ -169,6 +168,15 @@ function handleTowerRegenerationUpgradeClick() {
     }
 }
 
+function handleTowerMaxHealthUpgradeClick() {
+    if (canAffordUpgrade("towerMaxHealthUpgradeCost")) {
+        gameValues.currency -= getGameValue("towerMaxHealthUpgradeCost");
+        gameValues.upgrades.maxHealth++;
+
+        towerMaxHealthUpgrade.querySelector('.buy-button').textContent = `Buy: ${getGameValue("towerMaxHealthUpgradeCost")}C`;
+    }
+}
+
 // Mouse
 function handleMouseMove(e) {
     gameMouse.x = e.clientX - canvasRect.left;
@@ -181,7 +189,7 @@ function handleBasicEnemyDeath() {
 }
 
 function handleTowerDeath() {
-    towerHealth = TOWER_BASE_HEALTH;
+    towerHealth = getGameValue("towerMaxHealth");
 
     wave = 1;
     waveAcimulator = 0;
@@ -196,15 +204,19 @@ function getGameValue(value) {
         towerAttackSpeedUpgradeCost: () => gameValues.upgrades.attackCooldown + 1,
         towerDamageUpgradeCost: () => gameValues.upgrades.damage + 1,
         towerRegenerationUpgradeCost: () => gameValues.upgrades.regeneration + 1,
+        towerMaxHealthUpgradeCost: () => gameValues.upgrades.maxHealth + 1,
 
-        basicEnemyCurrencyReward: () => Math.floor(Math.pow(1.072, wave)),
+        basicEnemyCurrencyReward: () => Math.log10(wave + 10),
 
-        towerHealth: () => TOWER_BASE_HEALTH * Math.floor(Math.pow(1.5, gameValues.upgrades.maxHealth)),
+        towerHealth: () => TOWER_BASE_HEALTH * Math.floor(Math.pow(1.2, gameValues.upgrades.maxHealth)),
         basicEnemyHealth: () => BASIC_ENEMY_BASE_HEALTH * Math.floor(Math.pow(1.3, wave)),
 
-        towerAttackCooldown: () => TOWER_BASE_ATTACK_COOLDOWN * 10 / (gameValues.upgrades.attackCooldown + 10),
-        towerBulletDamage: () => TOWER_BULLET_BASE_DAMAGE * Math.floor(Math.pow(2, gameValues.upgrades.damage)),
-        towerRegeneration: () => Math.pow(1.18, gameValues.upgrades.regeneration) * 0.001
+        basicEnemyDamage: () => BASIC_ENEMY_BASE_DAMAGE * Math.pow(1.3, wave),
+
+        towerAttackCooldown: () => TOWER_BASE_ATTACK_COOLDOWN * 20 / (gameValues.upgrades.attackCooldown + 20),
+        towerBulletDamage: () => TOWER_BULLET_BASE_DAMAGE * Math.pow(1.2, gameValues.upgrades.damage),
+        towerRegeneration: () => Math.pow(1.18, gameValues.upgrades.regeneration) * 0.001,
+        towerMaxHealth: () => TOWER_BASE_HEALTH * Math.pow(1.2, gameValues.upgrades.maxHealth)
     }
 
     return values[value]();
@@ -259,7 +271,7 @@ function stepWave() {
         }
     }
 
-    if (waveStageAcimulator > 5) {
+    if (waveStageAcimulator > WAVE_MAX_STAGE) {
         waveStageAcimulator = 0;
         wave++;
     }
@@ -314,7 +326,7 @@ function updateBasicEnemies() {
         } else {
             if (currentBasicEnemy.attackCooldown > BASIC_ENEMY_BASE_ATTACK_COOLDOWN) {
                 currentBasicEnemy.attackCooldown = 0;
-                towerHealth -= BASIC_ENEMY_BASE_DAMAGE;
+                towerHealth -= getGameValue("basicEnemyDamage");
             }
         }
     }
@@ -363,12 +375,11 @@ function shootTowerBullet() {
 
 function updateTower() {
     towerAttackCooldown += dt;
-    if (towerHealth < TOWER_BASE_HEALTH) {
-        towerHealth += getGameValue("towerRegeneration") * dt;
-        towerHealth = Math.min(towerHealth, TOWER_BASE_HEALTH);
-    }
-
+    
     if (towerHealth <= 1) handleTowerDeath();
+
+    towerHealth += getGameValue("towerRegeneration") * dt;
+    towerHealth = Math.min(towerHealth, getGameValue("towerMaxHealth"));
 }
 
 function stepGameTick() {
@@ -425,14 +436,16 @@ function updateTowerUpgradesUI() {
     towerAttackSpeedUpgrade.querySelector('.buy-button').classList.toggle("affordable", canAffordUpgrade("towerAttackSpeedUpgradeCost"));
     towerDamageUpgrade.querySelector('.buy-button').classList.toggle("affordable", canAffordUpgrade("towerDamageUpgradeCost"));
     towerRegenerationUpgrade.querySelector('.buy-button').classList.toggle("affordable", canAffordUpgrade("towerRegenerationUpgradeCost"));
+    towerMaxHealthUpgrade.querySelector('.buy-button').classList.toggle("affordable", canAffordUpgrade("towerMaxHealthUpgradeCost"));
 }
 
 function updateUI() {
-    currencyText.textContent = `Currency: ${gameValues.currency}`;
-    towerHealthText.textContent = `${Math.floor(towerHealth)} / ${Math.floor(TOWER_BASE_HEALTH)}`;
+    currencyText.textContent = `Currency: ${Math.floor(gameValues.currency)}`;
+    towerHealthText.textContent = `${Math.floor(towerHealth)} / ${Math.floor(getGameValue("towerMaxHealth"))}`;
     waveText.textContent = `Wave: ${wave}`;
 
-    towerHealthBar.style.setProperty("--width-scale", towerHealth / TOWER_BASE_HEALTH);
+    towerHealthBar.style.setProperty("--width-scale", towerHealth / getGameValue("towerMaxHealth"));
+    waveProgressBar.style.setProperty("--width-scale", 1 - waveStageAcimulator / WAVE_MAX_STAGE);
 
     updateTowerUpgradesUI();
 }
@@ -480,6 +493,7 @@ towerUpgradesOpenClose.addEventListener('click', handleTowerUpgradesOpenCloseCli
 towerAttackSpeedUpgrade.querySelector('.buy-button').addEventListener('click', handleTowerAttackSpeedUpgradeClick);
 towerDamageUpgrade.querySelector('.buy-button').addEventListener('click', handleTowerDamageUpgradeClick);
 towerRegenerationUpgrade.querySelector('.buy-button').addEventListener('click', handleTowerRegenerationUpgradeClick);
+towerMaxHealthUpgrade.querySelector('.buy-button').addEventListener('click', handleTowerMaxHealthUpgradeClick);
 
 
 // ==========

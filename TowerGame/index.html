@@ -9,12 +9,18 @@
     </head>
     <body>
         <div id="game-container">
-            <canvas id="canvas" class="ignore-on-click"></canvas>
+            <canvas id="canvas"></canvas>
             
-            <div id="game-ui-container" class="ignore-on-click">
-                <span id="currency-text" class="ignore-on-click">Currency: 0</span>
+            <div id="game-ui-container">
+                <div id="values-container">
+                    <span id="currency-text">Currency: 0</span>
+                    <span id="gems-text">Gems: 0</span>
+                </div>
 
-                <span id="wave-text" class="ignore-on-click">Wave: 1</span>
+                <div id="wave-info-container">
+                    <span id="wave-text">Wave: 1</span>
+                    <div id="wave-progress-bar"></div>
+                </div>
 
                 <div id="health-bar-container">
                     <div id="tower-health-background-bar"></div>
@@ -35,6 +41,10 @@
                         </div>
                         <div class="upgrade" id="tower-regeneration-upgrade">
                             <span>Regeneration</span>
+                            <span class="buy-button">Buy: 1C</span>
+                        </div>
+                        <div class="upgrade" id="tower-max-health-upgrade">
+                            <span>Max Health</span>
                             <span class="buy-button">Buy: 1C</span>
                         </div>
                     </div>

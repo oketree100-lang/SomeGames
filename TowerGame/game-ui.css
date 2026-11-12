@@ -37,11 +37,25 @@
     background-color: #4ee031;
 }
 
-#currency-text {
+#values-container {
     position: absolute;
+    display: grid;
 
-    left: 1%;
     top: 1%;
+    left: 1%;
+}
+
+#currency-text {
+    position: relative;
+
+    font-family: 'Lilita One', 'Arial Black', sans-serif;
+    font-size: 2cqw;
+    color: white;
+    -webkit-text-stroke: 0.060cqw black;
+}
+
+#gems-text {
+    position: relative;
 
     font-family: 'Lilita One', 'Arial Black', sans-serif;
     font-size: 2cqw;
@@ -55,7 +69,7 @@
     position: absolute;
 
     left: 50%;
-    bottom: 5%;
+    bottom: 4.6%;
     transform: translate(-15cqw);
     
     width: calc(30cqw * var(--width-scale));
@@ -97,20 +111,6 @@
     -webkit-text-stroke: 0.060cqw black;
 }
 
-#wave-text {
-    position: absolute;
-
-    left: 50%;
-    top: 1%;
-
-    transform: translate(-50%);
-
-    font-family: 'Lilita One', 'Arial Black', sans-serif;
-    font-size: 3cqw;
-    color: white;
-    -webkit-text-stroke: 0.060cqw black;
-}
-
 #tower-upgrades-menu {
     --x-offset: 1;
 
@@ -121,7 +121,7 @@
     transition: left ease 0.2s;
 
     left: calc(-20% * var(--x-offset));
-    top: 10%;
+    top: 15%;
 
     width: 25cqw;
     height: 45cqw;
@@ -158,4 +158,37 @@
     border: solid;
     border-color: black;
     border-width: 0.2cqw;
+}
+
+#wave-info-container {
+    position: absolute;
+    display: grid;
+
+    justify-items: center;
+
+    left: 50%;
+    top: 1%;
+    transform: translate(-50%);
+}
+
+#wave-text {
+    position: relative;
+
+    font-family: 'Lilita One', 'Arial Black', sans-serif;
+    font-size: 3cqw;
+    color: white;
+    -webkit-text-stroke: 0.060cqw black;
+}
+
+#wave-progress-bar {
+    --width-scale: 1;
+
+    transition: width 0.5s ease;
+    
+    position: relative;
+
+    width: calc(20cqw * var(--width-scale));
+    height: 0.7cqw;
+
+    background-color: #4ee031;
 }

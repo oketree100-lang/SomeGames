@@ -1,4 +1,4 @@
-.upgrade {
+.upgrade {    
     display: grid;
 
     justify-content: center;
@@ -25,10 +25,16 @@
 
     bottom: 10%;
 
-    background-color: #4ee031;
+    padding: 0.3cqw;
+
+    background-color: #666262;
     border: solid;
     border-color: black;
     border-radius: 10px;
+}
+
+.affordable {
+    background-color: #4ee031;
 }
 
 #currency-text {

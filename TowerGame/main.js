@@ -8,8 +8,10 @@ const canvas = document.getElementById("canvas");
 
 // UI
 const currencyText = document.getElementById("currency-text");
+const gemsText = document.getElementById("gems-text");
 const towerHealthText = document.getElementById("tower-health-text");
 const waveText = document.getElementById("wave-text");
+
 const towerUpgradesOpenClose = document.getElementById("tower-upgrades-open-close");
 const towerUpgradesMenu = document.getElementById("tower-upgrades-menu");
 
@@ -63,12 +65,13 @@ const BASIC_ENEMY_STOP_RADIUS_SQUARED = 10000;
 
 
 // Other
-const WAVE_BASE_DELAY = 1400;
+const WAVE_BASE_DELAY = 1800;
 const WAVE_MAX_STAGE = 5;
 
 // Objects
 const gameValues = {
     currency: 0,
+    gems: 0,
     
     upgrades: {
         attackCooldown: 0,
@@ -186,6 +189,7 @@ function handleMouseMove(e) {
 // Game Event Handlers
 function handleBasicEnemyDeath() {
     gameValues.currency += getGameValue("basicEnemyCurrencyReward");
+    gameValues.gems += getGameValue("basicEnemyGemReward");
 }
 
 function handleTowerDeath() {
@@ -206,17 +210,19 @@ function getGameValue(value) {
         towerRegenerationUpgradeCost: () => gameValues.upgrades.regeneration + 1,
         towerMaxHealthUpgradeCost: () => gameValues.upgrades.maxHealth + 1,
 
-        basicEnemyCurrencyReward: () => Math.log10(wave + 10),
+        basicEnemyCurrencyReward: () => 1 + Math.log10(wave),
+        
+        basicEnemyGemReward: () => 0.001,
 
         towerHealth: () => TOWER_BASE_HEALTH * Math.floor(Math.pow(1.2, gameValues.upgrades.maxHealth)),
         basicEnemyHealth: () => BASIC_ENEMY_BASE_HEALTH * Math.floor(Math.pow(1.3, wave)),
 
-        basicEnemyDamage: () => BASIC_ENEMY_BASE_DAMAGE * Math.pow(1.3, wave),
+        basicEnemyDamage: () => BASIC_ENEMY_BASE_DAMAGE * Math.pow(1.25, wave),
 
         towerAttackCooldown: () => TOWER_BASE_ATTACK_COOLDOWN * 20 / (gameValues.upgrades.attackCooldown + 20),
-        towerBulletDamage: () => TOWER_BULLET_BASE_DAMAGE * Math.pow(1.2, gameValues.upgrades.damage),
+        towerBulletDamage: () => TOWER_BULLET_BASE_DAMAGE * Math.pow(1.2, gameValues.upgrades.damage) + gameValues.upgrades.damage,
         towerRegeneration: () => Math.pow(1.18, gameValues.upgrades.regeneration) * 0.001,
-        towerMaxHealth: () => TOWER_BASE_HEALTH * Math.pow(1.2, gameValues.upgrades.maxHealth)
+        towerMaxHealth: () => TOWER_BASE_HEALTH * Math.pow(1.15, gameValues.upgrades.maxHealth)
     }
 
     return values[value]();
@@ -441,6 +447,7 @@ function updateTowerUpgradesUI() {
 
 function updateUI() {
     currencyText.textContent = `Currency: ${Math.floor(gameValues.currency)}`;
+    gemsText.textContent = `Gems: ${Math.floor(gameValues.gems)}`;
     towerHealthText.textContent = `${Math.floor(towerHealth)} / ${Math.floor(getGameValue("towerMaxHealth"))}`;
     waveText.textContent = `Wave: ${wave}`;
 

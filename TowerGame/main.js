@@ -11,6 +11,8 @@ const currencyText = document.getElementById("currency-text");
 const gemsText = document.getElementById("gems-text");
 const towerHealthText = document.getElementById("tower-health-text");
 const waveText = document.getElementById("wave-text");
+const enemyHealthText = document.getElementById("enemy-health-text");
+const enemyDamageText = document.getElementById("enemy-damage-text");
 
 const towerUpgradesOpenClose = document.getElementById("tower-upgrades-open-close");
 const towerUpgradesMenu = document.getElementById("tower-upgrades-menu");
@@ -115,7 +117,7 @@ let towerHealth = TOWER_BASE_HEALTH;
 
 
 // Event Handlers
-// Window
+// Document & Window
 function handleWindowResize(e) {
     canvasRect = canvas.getBoundingClientRect();
 
@@ -129,6 +131,12 @@ function handleVisiblityChange() {
     if (!document.hidden) {
         lastFrame = Date.now();
         dt = 0;
+    }
+}
+
+function handleKeyDown(e) {
+    if (e.key == "w") {
+        waveAcimulator += WAVE_BASE_DELAY * (WAVE_MAX_STAGE - waveStageAcimulator + 1);
     }
 }
 
@@ -149,7 +157,8 @@ function handleTowerAttackSpeedUpgradeClick() {
         gameValues.currency -= getGameValue("towerAttackSpeedUpgradeCost");
         gameValues.upgrades.attackCooldown++;
 
-        towerAttackSpeedUpgrade.querySelector('.buy-button').textContent = `Buy: ${getGameValue("towerAttackSpeedUpgradeCost")}C`;
+        towerAttackSpeedUpgrade.querySelector('.buy-button').textContent = `${getGameValue("towerAttackSpeedUpgradeCost")}C`;
+        towerAttackSpeedUpgrade.querySelector('.upgrade-value').textContent = `${(1000 / getGameValue("towerAttackCooldown")).toFixed(2)}s`;
     }
 }
 
@@ -158,7 +167,8 @@ function handleTowerDamageUpgradeClick() {
         gameValues.currency -= getGameValue("towerDamageUpgradeCost");
         gameValues.upgrades.damage++;
 
-        towerDamageUpgrade.querySelector('.buy-button').textContent = `Buy: ${getGameValue("towerDamageUpgradeCost")}C`;
+        towerDamageUpgrade.querySelector('.buy-button').textContent = `${getGameValue("towerDamageUpgradeCost")}C`;
+        towerDamageUpgrade.querySelector('.upgrade-value').textContent = getGameValue("towerBulletDamage").toFixed(2);
     }
 }
 
@@ -167,7 +177,8 @@ function handleTowerRegenerationUpgradeClick() {
         gameValues.currency -= getGameValue("towerRegenerationUpgradeCost");
         gameValues.upgrades.regeneration++;
 
-        towerRegenerationUpgrade.querySelector('.buy-button').textContent = `Buy: ${getGameValue("towerRegenerationUpgradeCost")}C`;
+        towerRegenerationUpgrade.querySelector('.buy-button').textContent = `${getGameValue("towerRegenerationUpgradeCost")}C`;
+        towerRegenerationUpgrade.querySelector('.upgrade-value').textContent = `${(1000 * getGameValue("towerRegeneration")).toFixed(2)}s`;
     }
 }
 
@@ -176,7 +187,8 @@ function handleTowerMaxHealthUpgradeClick() {
         gameValues.currency -= getGameValue("towerMaxHealthUpgradeCost");
         gameValues.upgrades.maxHealth++;
 
-        towerMaxHealthUpgrade.querySelector('.buy-button').textContent = `Buy: ${getGameValue("towerMaxHealthUpgradeCost")}C`;
+        towerMaxHealthUpgrade.querySelector('.buy-button').textContent = `${getGameValue("towerMaxHealthUpgradeCost")}C`;
+        towerMaxHealthUpgrade.querySelector('.upgrade-value').textContent = getGameValue("towerMaxHealth").toFixed(2);
     }
 }
 
@@ -445,11 +457,20 @@ function updateTowerUpgradesUI() {
     towerMaxHealthUpgrade.querySelector('.buy-button').classList.toggle("affordable", canAffordUpgrade("towerMaxHealthUpgradeCost"));
 }
 
+function uiSetUp() {
+    towerAttackSpeedUpgrade.querySelector('.upgrade-value').textContent = `${(1000 / getGameValue("towerAttackCooldown")).toFixed(2)}s`;
+    towerDamageUpgrade.querySelector('.upgrade-value').textContent = getGameValue("towerBulletDamage").toFixed(2)
+    towerRegenerationUpgrade.querySelector('.upgrade-value').textContent = `${(1000 * getGameValue("towerRegeneration")).toFixed(2)}s`;
+    towerMaxHealthUpgrade.querySelector('.upgrade-value').textContent = getGameValue("towerMaxHealth").toFixed(2);
+}
+
 function updateUI() {
     currencyText.textContent = `Currency: ${Math.floor(gameValues.currency)}`;
     gemsText.textContent = `Gems: ${Math.floor(gameValues.gems)}`;
     towerHealthText.textContent = `${Math.floor(towerHealth)} / ${Math.floor(getGameValue("towerMaxHealth"))}`;
     waveText.textContent = `Wave: ${wave}`;
+    enemyHealthText.textContent = `Health: ${Math.floor(getGameValue("basicEnemyHealth"))}`;
+    enemyDamageText.textContent = `Damage: ${Math.floor(getGameValue("basicEnemyDamage"))}`;
 
     towerHealthBar.style.setProperty("--width-scale", towerHealth / getGameValue("towerMaxHealth"));
     waveProgressBar.style.setProperty("--width-scale", 1 - waveStageAcimulator / WAVE_MAX_STAGE);
@@ -493,6 +514,7 @@ window.addEventListener('resize', handleWindowResize);
 // Document
 document.addEventListener('visibilitychange', handleVisiblityChange);
 document.addEventListener('mousemove', handleMouseMove);
+document.addEventListener('keydown', handleKeyDown);
 
 // Tower Upgrades
 towerUpgradesOpenClose.addEventListener('click', handleTowerUpgradesOpenCloseClick);
@@ -509,5 +531,6 @@ towerMaxHealthUpgrade.querySelector('.buy-button').addEventListener('click', han
 
 
 handleWindowResize();
+uiSetUp();
 
 requestAnimationFrame(stepFrame);

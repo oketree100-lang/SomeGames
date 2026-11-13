@@ -2,13 +2,13 @@
     display: grid;
 
     justify-content: center;
+    justify-items: center;
 
     width: 15cqw;
     height: 6cqw;
 
     margin: 0.3cqw;
 
-    
     font-family: 'Lilita One', 'Arial Black', sans-serif;
     font-size: 1.4cqw;
     color: white;
@@ -19,18 +19,21 @@
 
 .buy-button {
     position: relative;
+    display: grid;
 
-    align-content: center;
     text-align: center;
+    align-content: center;
 
-    bottom: 10%;
+    width: 14cqw;
+    height: 1cqw;
+
+    bottom: 0%;
 
     padding: 0.3cqw;
 
     background-color: #666262;
     border: solid;
-    border-color: black;
-    border-radius: 10px;
+    border-color: black;;
 }
 
 .affordable {
@@ -121,10 +124,10 @@
     transition: left ease 0.2s;
 
     left: calc(-20% * var(--x-offset));
-    top: 15%;
+    top: 20%;
 
     width: 25cqw;
-    height: 45cqw;
+    height: 35cqw;
 
     background-color: #e7a160;
 }
@@ -133,7 +136,7 @@
     overflow-y: auto;
     scrollbar-width: none;
 
-    height: 45cqw;
+    height: 35cqw;
 }
 
 #tower-upgrades-open-close {
@@ -192,4 +195,30 @@
 
     background-color: #4ee031;
     /* background-color: color-mix(in oklab, #4ee031, #cc2424 calc(100% - var(--width-scale) * 100%)); */
+}
+
+#enemy-info-container {
+    position: absolute;
+    display: grid;
+
+    bottom: 3%;
+    left: 1%;
+}
+
+#enemy-health-text {
+    position: relative;
+
+    font-family: 'Lilita One', 'Arial Black', sans-serif;
+    font-size: 2cqw;
+    color: white;
+    -webkit-text-stroke: 0.060cqw black;
+}
+
+#enemy-damage-text {
+    position: relative;
+
+    font-family: 'Lilita One', 'Arial Black', sans-serif;
+    font-size: 2cqw;
+    color: white;
+    -webkit-text-stroke: 0.060cqw black;
 }

@@ -1,3 +1,6 @@
+let flappyBirdImage = new Image();
+flappyBirdImage.src = "./green_bird.png";
+
 const canvas = document.getElementById("canvas");
 
 canvas.width = 600;
@@ -5,6 +8,8 @@ canvas.height = 911;
 
 const width = 600;
 const height = 911;
+
+const flappyBirdSize = 100;
 
 const ctx = canvas.getContext("2d");
 
@@ -112,7 +117,8 @@ function render() {
     ctx.save();
     ctx.translate(175, bird.y);
     ctx.rotate(Math.tanh(bird.v / 8) / 2);
-    ctx.fillRect(-25, -25, 50, 50);
+    // ctx.fillRect(-25, -25, 50, 50);
+    ctx.drawImage(flappyBirdImage, -flappyBirdSize * 0.5, -flappyBirdSize * 0.5, flappyBirdSize, flappyBirdSize);
     ctx.restore();
 
     let offset = 30;

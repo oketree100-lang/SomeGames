@@ -1,15 +1,19 @@
 body {
+    display: grid;
+
     margin: 0;
     padding: 0;
     overflow: hidden;
 
-    place-items: center;
+    height: 100vh;
+
+    justify-content: center;
+    align-items: center;
 
     background-color: #222;
 }
 
 #canvas {
-    display: block;
     background: #73aae9;
 
     width: 31.25vw;

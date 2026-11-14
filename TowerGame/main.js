@@ -2,6 +2,9 @@
 // CONSTANTS
 // =========
 
+// Imports
+import BigNumber from "./BigNumber.js";
+window.BigNumber = BigNumber;
 
 // HTML Elements
 const canvas = document.getElementById("canvas");

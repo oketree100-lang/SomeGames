@@ -52,7 +52,7 @@ const GAME_HEIGHT = 720;
 const TOWER_BASE_SIZE = 80;
 const TOWER_CANNON_SIZE = 100;
 const TOWER_BULLET_SIZE = 50;
-const BASIC_ENEMY_SIZE = 50;
+const BASIC_ENEMY_SIZE = 65;
 
 // Half Dimensions
 const GAME_HALF_WIDTH = GAME_WIDTH * 0.5;

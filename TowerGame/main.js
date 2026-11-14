@@ -6,10 +6,27 @@
 import BigNumber from "./BigNumber.js";
 window.BigNumber = BigNumber;
 
+// Images
+const TOWER_BASE_IMAGE = new Image();
+TOWER_BASE_IMAGE.src = "./cannon_base.png";
+
+const TOWER_CANNON_IMAGE = new Image();
+TOWER_CANNON_IMAGE.src = "./cannon_head.png";
+
+const TOWER_BULLET_IMAGE = new Image();
+TOWER_BULLET_IMAGE.src = "./cannon_ball.png";
+
+const BASIC_ENEMY_RIGHT_IMAGE = new Image()
+BASIC_ENEMY_RIGHT_IMAGE.src = "./ghost_right.png";
+
+const BASIC_ENEMY_LEFT_IMAGE = new Image()
+BASIC_ENEMY_LEFT_IMAGE.src = "./ghost_left.png";
+
+
 // HTML Elements
 const canvas = document.getElementById("canvas");
 
-// UI
+// HTML UI
 const currencyText = document.getElementById("currency-text");
 const gemsText = document.getElementById("gems-text");
 const towerHealthText = document.getElementById("tower-health-text");
@@ -28,24 +45,20 @@ const towerMaxHealthUpgrade = document.getElementById("tower-max-health-upgrade"
 const towerHealthBar = document.getElementById("tower-health-bar");
 const waveProgressBar = document.getElementById("wave-progress-bar");
 
-// Color Constants
-const TOWER_COLOR = "#ffc400";
-const TOWER_BULLET_COLOR = "#000000";
-const BASIC_ENEMY_COLOR = "#ffffff";
-const TEXT_COLOR = "#ffffff";
-
 // Game Constants
 // Dimensions
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
-const TOWER_SIZE = 50;
-const TOWER_BULLET_SIZE = 10;
-const BASIC_ENEMY_SIZE = 25;
+const TOWER_BASE_SIZE = 80;
+const TOWER_CANNON_SIZE = 100;
+const TOWER_BULLET_SIZE = 50;
+const BASIC_ENEMY_SIZE = 50;
 
 // Half Dimensions
 const GAME_HALF_WIDTH = GAME_WIDTH * 0.5;
 const GAME_HALF_HEIGHT = GAME_HEIGHT * 0.5;
-const TOWER_HALF_SIZE = TOWER_SIZE * 0.5;
+const TOWER_BASE_HALF_SIZE = TOWER_BASE_SIZE * 0.5;
+const TOWER_CANNON_HALF_SIZE = TOWER_CANNON_SIZE * 0.5;
 const TOWER_BULLET_HALF_SIZE = TOWER_BULLET_SIZE * 0.5;
 const BASIC_ENEMY_HALF_SIZE = BASIC_ENEMY_SIZE * 0.5;
 
@@ -100,6 +113,8 @@ const basicEnemies = [];
 // Canvas
 let canvasRect;
 let canvasCtx;
+
+let towerCannonAngle = 0;
 
 // Frame
 let lastFrame = Date.now();
@@ -280,11 +295,14 @@ function stepWave() {
                 y = Math.random() * GAME_HEIGHT;
             }
 
+            const angle = Math.atan2(GAME_HALF_HEIGHT - y, GAME_HALF_WIDTH - x);
+
             const newBasicEnemy = {
                 x: x,
                 y: y,
                 health: getGameValue("basicEnemyHealth"),
-                attackCooldown: 0
+                attackCooldown: 0,
+                angle: angle
             }
 
             basicEnemies.push(newBasicEnemy);
@@ -339,10 +357,8 @@ function updateBasicEnemies() {
         }
 
         if (Math.pow(GAME_HALF_WIDTH - currentBasicEnemy.x, 2) + Math.pow(GAME_HALF_HEIGHT - currentBasicEnemy.y, 2) > BASIC_ENEMY_STOP_RADIUS_SQUARED) {
-            const angle = Math.atan2(GAME_HALF_HEIGHT - currentBasicEnemy.y, GAME_HALF_WIDTH - currentBasicEnemy.x);
-
-            currentBasicEnemy.x += BASIC_ENEMY_SPEED * Math.cos(angle) * dt;
-            currentBasicEnemy.y += BASIC_ENEMY_SPEED * Math.sin(angle) * dt;
+            currentBasicEnemy.x += BASIC_ENEMY_SPEED * Math.cos(currentBasicEnemy.angle) * dt;
+            currentBasicEnemy.y += BASIC_ENEMY_SPEED * Math.sin(currentBasicEnemy.angle) * dt;
         } else {
             if (currentBasicEnemy.attackCooldown > BASIC_ENEMY_BASE_ATTACK_COOLDOWN) {
                 currentBasicEnemy.attackCooldown = 0;
@@ -365,7 +381,7 @@ function shootTowerBullet() {
         for (let i = 0; i < allEnemies.length; i++) {
             const currentEnemy = allEnemies[i];
 
-            const distanceSquared = Math.pow(currentEnemy.x - GAME_HALF_WIDTH) + Math.pow(currentEnemy.y - GAME_HALF_HEIGHT);
+            const distanceSquared = Math.pow(currentEnemy.x - GAME_HALF_WIDTH, 2) + Math.pow(currentEnemy.y - GAME_HALF_HEIGHT, 2);
             distancesSquared.push(distanceSquared);
         }
 
@@ -381,12 +397,12 @@ function shootTowerBullet() {
 
         const currentEnemy = allEnemies[idx];
 
-        const angle = Math.atan2(currentEnemy.y - GAME_HALF_HEIGHT, currentEnemy.x - GAME_HALF_WIDTH);
-
+        towerCannonAngle = Math.atan2(currentEnemy.y - GAME_HALF_HEIGHT, currentEnemy.x - GAME_HALF_WIDTH);
+        
         const newTowerBullet = {
             x: GAME_HALF_WIDTH,
             y: GAME_HALF_HEIGHT,
-            angle: angle
+            angle: towerCannonAngle
         };
 
         towerBullets.push(newTowerBullet);
@@ -415,39 +431,37 @@ function stepGameTick() {
 
 // Rendering Logic
 function drawTower() {
-    canvasCtx.fillStyle = TOWER_COLOR;
     canvasCtx.save();
     canvasCtx.translate(GAME_HALF_WIDTH, GAME_HALF_HEIGHT);
-    canvasCtx.fillRect(-TOWER_HALF_SIZE, -TOWER_HALF_SIZE, TOWER_SIZE, TOWER_SIZE);
+    canvasCtx.drawImage(TOWER_BASE_IMAGE, -TOWER_BASE_HALF_SIZE, -TOWER_BASE_HALF_SIZE, TOWER_BASE_SIZE, TOWER_BASE_SIZE);
+    canvasCtx.rotate(3.14 + towerCannonAngle);
+    canvasCtx.drawImage(TOWER_CANNON_IMAGE, -TOWER_CANNON_HALF_SIZE, -TOWER_CANNON_HALF_SIZE, TOWER_CANNON_SIZE, TOWER_CANNON_SIZE);
     canvasCtx.restore();
 }
 
 function drawTowerBullets() {
-    canvasCtx.fillStyle = TOWER_BULLET_COLOR;
-
     for (let i = 0; i < towerBullets.length; i++) {
         const currentTowerBullet = towerBullets[i];
 
         canvasCtx.save();
         canvasCtx.translate(currentTowerBullet.x, currentTowerBullet.y);
         canvasCtx.rotate(currentTowerBullet.angle);
-        canvasCtx.fillRect(-TOWER_BULLET_HALF_SIZE, -TOWER_BULLET_HALF_SIZE, TOWER_BULLET_SIZE, TOWER_BULLET_SIZE);
+        canvasCtx.drawImage(TOWER_BULLET_IMAGE, -TOWER_BULLET_HALF_SIZE, -TOWER_BULLET_HALF_SIZE, TOWER_BULLET_SIZE, TOWER_BULLET_SIZE);
         canvasCtx.restore();
     }
 }
 
 function drawBasicEnemies() {
-    canvasCtx.fillStyle = BASIC_ENEMY_COLOR;
-
     for (let i = 0; i < basicEnemies.length; i++) {
         const currentBasicEnemy = basicEnemies[i];
         
-        const angle = Math.atan2(GAME_HALF_HEIGHT - currentBasicEnemy.y, GAME_HALF_WIDTH - currentBasicEnemy.x);
-
         canvasCtx.save();
         canvasCtx.translate(currentBasicEnemy.x, currentBasicEnemy.y);
-        canvasCtx.rotate(angle);
-        canvasCtx.fillRect(-BASIC_ENEMY_HALF_SIZE, -BASIC_ENEMY_HALF_SIZE, BASIC_ENEMY_SIZE, BASIC_ENEMY_SIZE);
+        if (currentBasicEnemy.angle < 1.57 && currentBasicEnemy.angle > -1.57) {
+            canvasCtx.drawImage(BASIC_ENEMY_RIGHT_IMAGE, -BASIC_ENEMY_HALF_SIZE, -BASIC_ENEMY_HALF_SIZE, BASIC_ENEMY_SIZE, BASIC_ENEMY_SIZE);
+        } else {
+            canvasCtx.drawImage(BASIC_ENEMY_LEFT_IMAGE, -BASIC_ENEMY_HALF_SIZE, -BASIC_ENEMY_HALF_SIZE, BASIC_ENEMY_SIZE, BASIC_ENEMY_SIZE);
+        }
         canvasCtx.restore();
     }
 }

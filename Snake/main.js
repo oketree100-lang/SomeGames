@@ -19,16 +19,20 @@ window.addEventListener("resize", resize)
 resize()
 
 const keys = {
-    "w" : "North",
-    "a" : "West",
-    "s" : "South",
-    "d" : "East"
+    "w": "North",
+    "a": "West",
+    "s": "South",
+    "d": "East",
+    "ArrowUp": "North",
+    "ArrowLeft": "West",
+    "ArrowDown": "South",
+    "ArrowRight": "East"
 }
 const opp = {
-    "North" : "South",
-    "South" : "North",
-    "East" : "West",
-    "West" : "East"
+    "North": "South",
+    "South": "North",
+    "East": "West",
+    "West": "East"
 }
 
 const snake = [[3, 8], [2, 8]];

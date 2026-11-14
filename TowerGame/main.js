@@ -80,15 +80,18 @@ const BASIC_ENEMY_BASE_ATTACK_COOLDOWN = 1000;
 
 // Radii
 const BASIC_ENEMY_STOP_RADIUS_SQUARED = 10000;
+const ENEMY_DENSITY_RADIUS_SQUARED = 100;
 
 
 // Other
 const WAVE_BASE_DELAY = 1800;
 const WAVE_MAX_STAGE = 5;
 
+const getAllEnemies = () => [...basicEnemies];
+
 // Objects
 const gameValues = {
-    currency: 0,
+    currency: 10000000,
     gems: 0,
     
     upgrades: {
@@ -244,14 +247,14 @@ function getGameValue(value) {
         
         basicEnemyGemReward: () => 0.001,
 
-        basicEnemyHealth: () => BigNumber.mult(BASIC_ENEMY_BASE_HEALTH, BigNumber.pow(1.3, wave)),
+        basicEnemyHealth: () => BigNumber.mult(BASIC_ENEMY_BASE_HEALTH, BigNumber.pow(1.07, wave)),
 
-        basicEnemyDamage: () => BigNumber.mult(BASIC_ENEMY_BASE_DAMAGE, BigNumber.pow(1.25, wave)),
+        basicEnemyDamage: () => BigNumber.mult(BASIC_ENEMY_BASE_DAMAGE, BigNumber.pow(1.06, wave)),
 
         towerAttackCooldown: () => TOWER_BASE_ATTACK_COOLDOWN * 20 / (gameValues.upgrades.attackCooldown + 20),
-        towerBulletDamage: () => BigNumber.mult(TOWER_BULLET_BASE_DAMAGE, BigNumber.pow(1.2, BigNumber.convertNumber(gameValues.upgrades.damage))).add(BigNumber.convertNumber(gameValues.upgrades.damage)),
-        towerRegeneration: () => BigNumber.div(BigNumber.pow(1.18, BigNumber.convertNumber(gameValues.upgrades.regeneration)), new BigNumber("1000")),
-        towerMaxHealth: () => BigNumber.mult(TOWER_BASE_HEALTH, BigNumber.pow(1.15, BigNumber.convertNumber(gameValues.upgrades.maxHealth)))
+        towerBulletDamage: () => BigNumber.mult(TOWER_BULLET_BASE_DAMAGE, BigNumber.pow(1.05, BigNumber.convertNumber(gameValues.upgrades.damage))).add(BigNumber.convertNumber(gameValues.upgrades.damage)),
+        towerRegeneration: () => BigNumber.div(BigNumber.pow(1.03, BigNumber.convertNumber(gameValues.upgrades.regeneration)), new BigNumber("1000")),
+        towerMaxHealth: () => BigNumber.mult(TOWER_BASE_HEALTH, BigNumber.pow(1.05, BigNumber.convertNumber(gameValues.upgrades.maxHealth)))
     }
 
     return values[value]();
@@ -368,8 +371,39 @@ function updateBasicEnemies() {
     }
 }
 
+function updateAllEnemies() {
+    const allEnemies = getAllEnemies();
+    
+    for (let i = 0; i < allEnemies.length; i++) {
+        const enemyA = allEnemies[i];
+
+        enemyA.angle = Math.atan2(GAME_HALF_HEIGHT - enemyA.y, GAME_HALF_WIDTH - enemyA.x);
+
+        for (let j = i + 1; j < allEnemies.length; j++) {
+            const enemyB = allEnemies[j];
+
+            const diffX = enemyB.x - enemyA.x;
+            const diffY = enemyB.y - enemyA.y;
+
+            const distanceSquared = Math.pow(diffX, 2) + Math.pow(diffY, 2);
+
+            if (distanceSquared < ENEMY_DENSITY_RADIUS_SQUARED) {
+                const angle = Math.atan2(diffY, diffX);
+                const sin = Math.sin(angle);
+                const cos = Math.cos(angle);
+
+                enemyA.x -= 10 * cos;
+                enemyA.y -= 10 * sin;
+
+                enemyB.x += 10 * cos;
+                enemyB.y += 10 * sin;
+            }
+        }
+    }
+}
+
 function shootTowerBullet() {
-    const allEnemies = [...basicEnemies];
+    const allEnemies = getAllEnemies();
 
     if (allEnemies.length == 0) return;
 
@@ -424,6 +458,7 @@ function stepGameTick() {
     shootTowerBullet();
     
     updateBasicEnemies();
+    updateAllEnemies();
 
     updateTower();
     updateTowerBullets();

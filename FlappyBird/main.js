@@ -29,7 +29,7 @@ canvas.addEventListener("click", (e) => {
     jump();
 })
 document.addEventListener("keydown", (e) => {
-    if (e.key == " " || e.key == "ArrowUp") {
+    if (e.key == " " || e.key == "ArrowUp" || e.key == "w") {
         jump();
     }
 })

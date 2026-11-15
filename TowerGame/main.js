@@ -91,7 +91,7 @@ const getAllEnemies = () => [...basicEnemies];
 
 // Objects
 const gameValues = {
-    currency: 10000000,
+    currency: 0,
     gems: 0,
     
     upgrades: {

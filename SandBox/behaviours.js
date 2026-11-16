@@ -74,8 +74,8 @@ export function setSim(_pixels, _pixelsAttr, _w, _h, _x, _y) {
 }
 
 
-function isValidAction(op, tp) {
-    return !pixelsAttr[op].updated && (pixels[tp] == 0 || pixelsAttr[tp].moved);
+function isValidMove(op, tp) {
+    return !pixelsAttr[op].updated && !pixelsAttr[tp].moved;
 }
 
 
@@ -139,6 +139,16 @@ function deletePixel(tp) {
 // Physical actions
 // ----------------
 
+function fall_down(...validPixels) {
+    const ty = y + 1;
+
+    if (ty < h) {
+        const tp = ty * w + x;
+        if (validPixels.includes(pixels[tp]) && isValidMove(y * w + x, tp)) {
+            swap(x, ty);
+        }
+    }
+}
 
 function fall() {
     const pixel = pixels[op];
@@ -148,7 +158,7 @@ function fall() {
         const tx = x + i;
         const ty = y + 1;
         const tp = ty * w + tx;
-        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0 && isValidAction(op, tp)) {
+        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0 && isValidMove(op, tp)) {
             options.push(i);
         }
     }
@@ -177,7 +187,7 @@ function rise() {
         const tx = x + i;
         const ty = y - 1;
         const tp = ty * w + tx;
-        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0 && isValidAction(op, tp)) {
+        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0 && isValidMove(op, tp)) {
             options.push(i);
         }
     }
@@ -204,7 +214,7 @@ function slide(...ignorePixels) {
     for (let i = -1; i < 2; i += 2) {
         const tx = x + i;
         const tp = y * w + tx;
-        if (tx >= 0 && tx < w && ignorePixels.includes(pixels[tp]) && isValidAction(op, tp)) {
+        if (tx >= 0 && tx < w && ignorePixels.includes(pixels[tp]) && isValidMove(op, tp)) {
             options.push(i);
         }
     }
@@ -232,7 +242,7 @@ function displace(...validDis) {
         const tx = x + i;
         const ty = y + 1;
         const tp = ty * w + tx;
-        if (tx >= 0 && tx < w && ty >= 0 && ty < h && validDis.includes(pixels[tp]) && isValidAction(op, tp)) {
+        if (tx >= 0 && tx < w && ty >= 0 && ty < h && validDis.includes(pixels[tp]) && isValidMove(op, tp)) {
             options.push(i);
             swaps.push(pixels[tp]);
         }
@@ -262,7 +272,7 @@ function fuse(fusePixel, resultPixel) {
             const nx = x + j;
             const ny = y + i;
             const tp = ny * w + nx;
-            if (nx >= 0 && nx < w && ny >= 0 && ny < h && pixels[tp] == fusePixel && isValidAction(op, tp)) {
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h && pixels[tp] == fusePixel && isValidMove(op, tp)) {
                 options.push(tp);
             }
         }
@@ -330,7 +340,7 @@ function water() {
         setPixel(y * w + x, STEAM);
     }
 
-    fall() || displace(...GAS, OIL) || slide(EMPTY, OIL);
+    fall_down(EMPTY, OIL) || slide(EMPTY, OIL);
 }
 
 function mud() {
@@ -361,7 +371,7 @@ function smoke() {
 }
 
 function oil() {
-    fall() || displace(...GAS) || slide(EMPTY, ...GAS, WATER);
+    fall_down(EMPTY, ...GAS) || slide(EMPTY, ...GAS, WATER);
     
     pixelsAttr[y * w + x].temp > 50 && create(FIRE) && (Math.random() > 0.001 || deletePixel(y * w + x));
 }

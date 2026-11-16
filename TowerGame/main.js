@@ -84,7 +84,7 @@ const ENEMY_DENSITY_RADIUS_SQUARED = 100;
 
 
 // Other
-const WAVE_BASE_DELAY = 1800;
+const WAVE_BASE_DELAY = 1300;
 const WAVE_MAX_STAGE = 5;
 
 const getAllEnemies = () => [...basicEnemies];

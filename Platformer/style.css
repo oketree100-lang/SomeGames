@@ -5,6 +5,9 @@ body {
     justify-content: center;
     align-content: center;
 
+    padding: 0px;
+    margin: 0px;
+
     height: 100vh;
 
     background-color: #222;
@@ -26,7 +29,7 @@ body {
 
 #canvas {
     display: block;
-    background-color: rgb(25, 185, 92);
+    background-color: #87d0d3;
 
     padding: 0;
     margin: auto 0;

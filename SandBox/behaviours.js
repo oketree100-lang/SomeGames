@@ -150,7 +150,7 @@ function fall_down(...validPixels) {
     }
 }
 
-function fall() {
+function fall(...validPixels) {
     const pixel = pixels[op];
     const options = [];
     
@@ -158,7 +158,7 @@ function fall() {
         const tx = x + i;
         const ty = y + 1;
         const tp = ty * w + tx;
-        if (tx >= 0 && tx < w && ty >= 0 && ty < h && pixels[tp] == 0 && isValidMove(op, tp)) {
+        if (tx >= 0 && tx < w && ty < h && validPixels.includes(pixels[tp]) && isValidMove(op, tp)) {
             options.push(i);
         }
     }
@@ -332,15 +332,16 @@ function empty() {}
 function sand() {
     if (fuse(WATER, MUD)) return;
 
-    fall() || displace(...DISPLACE1);
+    fall_down(EMPTY) || fall();
 }
 
 function water() {
     if (pixelsAttr[y * w + x].temp >= 500) {
         setPixel(y * w + x, STEAM);
+        return;
     }
 
-    fall_down(EMPTY, OIL) || slide(EMPTY, OIL);
+    fall(EMPTY) || fall_down(EMPTY, OIL) || slide(EMPTY, OIL);
 }
 
 function mud() {
@@ -371,9 +372,9 @@ function smoke() {
 }
 
 function oil() {
-    fall_down(EMPTY, ...GAS) || slide(EMPTY, ...GAS, WATER);
-    
     pixelsAttr[y * w + x].temp > 50 && create(FIRE) && (Math.random() > 0.001 || deletePixel(y * w + x));
+
+    fall_down(EMPTY, ...GAS) || fall(EMPTY, ...GAS) || slide(EMPTY, ...GAS);
 }
 
 function fire() {
